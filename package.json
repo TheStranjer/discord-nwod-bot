@@ -4,5 +4,8 @@
   "description": "A New World of Darkness/Chronicles of Darkness bot for Discord",
   "main": "bot.js",
   "author": "Luke Laupheimer",
-  "dependencies": {}
+  "dependencies": {
+    "discord.io": "^2.5.3",
+    "winston": "^2.4.0"
+  }
 }
