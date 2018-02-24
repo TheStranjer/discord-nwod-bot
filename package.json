@@ -1,7 +1,8 @@
 {
-  "name": "CofD Dicebot",
+  "name": "lady-luck",
   "version": "1.0.0",
   "description": "A New World of Darkness/Chronicles of Darkness bot for Discord",
   "main": "bot.js",
   "author": "Luke Laupheimer",
   "dependencies": {}
+}
