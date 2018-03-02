@@ -42,6 +42,8 @@ function nwodRoll(pool, again) {
     while (true) {
       result = d10();
 
+      outcome.results.push(result);
+
       if (result != 10) {
         break;
       }
