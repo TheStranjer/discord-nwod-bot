@@ -5,13 +5,29 @@ console.log("The Stranjer\n\n");
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
+const RandomOrg = require('random-org');
+
+var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
+var random = new RandomOrg({ apiKey: auth.random });
+
+var d10s = [];
 
 function randInt(min, max) {
   return min + Math.round(Math.random() * (max - min));
 }
 
 function d10() {
-  return randInt(1, 10);
+  return d10s.pop();
+}
+
+function d10RefillCheck() {
+  if (d10s.length < 100) {
+    console.log(`d10s have ${d10s.length} left. Refilling...`);
+    random.generateIntegers({ min: 1, max: 10, n: 100 }).then(function (result) {
+      d10s = d10s.concat(result.random.data);
+      console.log(`d10s now at ${d10s.length}.`);
+    });
+  }
 }
 
 function nwodRoll(pool, again) {
@@ -32,6 +48,10 @@ function nwodRoll(pool, again) {
   } else if (outcome.again < 8) {
     outcome.errors.push("Exploding dice may not be below 8");
   }
+  
+  if (outcome.pool > 25) {
+    outcome.errors.push("Cannot roll more than 25 dice");
+  }
 
   if (outcome.errors.length > 0) {
     return outcome;
@@ -51,6 +71,8 @@ function nwodRoll(pool, again) {
       outcome.successes++;
     }
 
+    d10RefillCheck();
+
     return outcome;
   }
 
@@ -64,6 +86,8 @@ function nwodRoll(pool, again) {
     } while (result >= outcome.again);
   }
 
+  d10RefillCheck();
+  
   return outcome;
 }
 
@@ -121,7 +145,7 @@ client.on('message', msg => {
   }
 });
 
-var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
 
+d10RefillCheck();
 process.stdout.write("Logging in now...");
 client.login(auth.token);
