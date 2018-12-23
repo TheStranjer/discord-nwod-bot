@@ -121,18 +121,50 @@ function nwodToText(outcome) {
   var newResults = outcome.results;
 
   for (var i = 0; i < newResults.length; i++) {
-    if (newResults[i] >= 8) {
-      newResults[i] = `**${newResults[i]}**`;
-    } else {
-      newResults[i] = newResults[i].toString();
+    var mode = "fail";
+    if (newResults[i] >= outcome.again) {
+      mode = "explode";
+    } else if (newResults[i] >= 8) {
+      mode = "success";
     }
+  
+   emojiName = "d10" + mode + "_" + newResults[i];
+  
+   newResults[i] = diceViews[emojiName];
   }
+
 
   return `Rolling ${outcome.pool}${againToWords(outcome.again)}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
 }
 
 client.on('ready', () => {
   console.log(` logged in as ${client.user.tag}!`);
+
+
+  for (i = 1; i <= 7; i++) {
+    emoji = client.emojis.find(emoji => emoji.name == "d10fail_" + i);
+    if (emoji) {
+      diceViews["d10fail_" + i] = emoji;
+    } else {
+      diceViews["d10fail_" + i] = "" + i;
+    }
+  }
+
+  for (i = 8; i <= 10; i++) {
+    emojiExplode = client.emojis.find(emoji => emoji.name == "d10explode_" + i);
+    if (emojiExplode) {
+      diceViews["d10explode_" + i] = emojiExplode;
+    } else {
+      diceViews["d10explode_" + i] = "**_" + i + "_**";
+    }
+
+    emojiSuccess = client.emojis.find(emoji => emoji.name == "d10success_" + i);
+    if (emojiSuccess) {
+      diceViews["d10success_" + i] = emojiSuccess;
+    } else {
+      diceViews["d10success_" + i] = "**" + i + "**";
+    }
+  }
 });
 
 client.on('message', msg => {
@@ -149,3 +181,7 @@ client.on('message', msg => {
 d10RefillCheck();
 process.stdout.write("Logging in now...");
 client.login(auth.token);
+
+diceViews = {};
+
+
