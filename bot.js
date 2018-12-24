@@ -137,16 +137,99 @@ function nwodToText(outcome) {
   return `Rolling ${outcome.pool}${againToWords(outcome.again)}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
 }
 
-function nwodInitToText(offset) {
+function padStart(str, len, val) {
+  while (str.length < len) {
+   str = val + str;
+  }
+  return str;
+};
+
+function generateTableContent(initTable) {
+  var ret = "**Initiative Table**\n\n```\n";
+
+  var chars = initTable.characters;
+
+  var keys = Object.keys(chars);
+  keys.sort(function (a, b) { return chars[b] - chars[a] });
+
+  var padLength = chars[keys[0]].toString().length;
+
+  keys.forEach(function(charName) {
+    var forcesText = (initTable.forces[charName] ? " (forced by " + initTable.forces[charName] + ")" : "");
+    ret += padStart(chars[charName].toString(), padLength, " ") + " : " + charName + forcesText + "\n";
+  });
+
+  ret += "```";
+
+  return ret;
+}
+
+function nwodInitForceToText(msg, val, name) {
+  if (!/^\d+$/.test(val)) {
+    msg.reply("Can only force the init table if given a number");
+    return;
+  }
+
+  if (!name) {
+    name = msg.member ? msg.member.nickname : msg.author.username;
+  }
+
+  var channelId = msg["channel"].id;
+  if (!initTables[channelId]) {
+    initTables[channelId] = { characters: {}, forces: {} };
+  }
+
+  initTables[channelId].characters[name] = val;
+  initTables[channelId].forces[name] = name;
+
+  var tableContent = generateTableContent(initTables[channelId]);
+  if (initTables[channelId].msg) {
+    initTables[channelId].msg.delete();
+  }
+
+  msg.channel.send(tableContent).then(function(tableMsg) {
+    initTables[channelId].msg = tableMsg;
+  });
+  
+}
+
+function nwodInitToText(msg, offset, name) {
   if (!/^\d+$/.test(offset)) {
     offset = 0;
   } else {
     offset = Number(offset);
   }
 
+  if (!name) {
+    name = msg.member ? msg.member.nickname : msg.author.username;
+  }
+
+
   var roll = d10();
-  
-  return "Rolling initiative: " + roll + " + " + offset + " = " + (roll + offset);
+  var channelId = msg["channel"].id;
+  var content = `Rolling initiative for ${name}: ${roll} (roll outcome) + ${offset} = ${roll + offset}`;
+  msg.reply(content).then(function (notificationMsg) {
+    if (!initTables[channelId]) {
+      initTables[channelId] = { characters: {}, forces: {} };
+    }
+
+    initTables[channelId].characters[name] = roll + offset;
+
+    var tableContent = generateTableContent(initTables[channelId]);
+    if (initTables[channelId].msg) {
+      initTables[channelId].msg.delete();
+    }
+
+    msg.channel.send(tableContent).then(function(tableMsg) {
+      initTables[channelId].msg = tableMsg;
+    });
+  });
+}
+
+function nwodInitClear(msg) {
+  var channelId = msg["channel"].id;
+  msg.reply("Cleared initiative table");
+  initTables[channelId] = { characters: {}, forces: {} };
 }
 
 client.on('ready', () => {
@@ -186,10 +269,12 @@ client.on('message', msg => {
     var outcome = nwodToText(nwodRoll(words[1], words[2]));
     console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${outcome}`)
     msg.reply(outcome);
-  } else if (command === '!init') {
-    var outcome = nwodInitToText(words[1]);
-    console.log("Rolling initiative for ${msg.author.username}#{msg.author.discriminator}: " + outcome);
-    msg.reply(outcome);
+  } else if (command == "!init") {
+    nwodInitToText(msg, words[1], words[2]);
+  } else if (command === "!initforce") {
+    nwodInitForceToText(msg, words[1], words[2]);
+  } else if (command === "!initclear") {
+    nwodInitClear(msg);
   }
 });
 
@@ -199,5 +284,5 @@ process.stdout.write("Logging in now...");
 client.login(auth.token);
 
 diceViews = {};
-
+initTables = {};
 
