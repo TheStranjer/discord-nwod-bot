@@ -137,6 +137,18 @@ function nwodToText(outcome) {
   return `Rolling ${outcome.pool}${againToWords(outcome.again)}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
 }
 
+function nwodInitToText(offset) {
+  if (!/^\d+$/.test(offset)) {
+    offset = 0;
+  } else {
+    offset = Number(offset);
+  }
+
+  var roll = d10();
+  
+  return "Rolling initiative: " + roll + " + " + offset + " = " + (roll + offset);
+}
+
 client.on('ready', () => {
   console.log(` logged in as ${client.user.tag}!`);
 
@@ -173,6 +185,10 @@ client.on('message', msg => {
   if (command === '!nwod') {
     var outcome = nwodToText(nwodRoll(words[1], words[2]));
     console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${outcome}`)
+    msg.reply(outcome);
+  } else if (command === '!init') {
+    var outcome = nwodInitToText(words[1]);
+    console.log("Rolling initiative for ${msg.author.username}#{msg.author.discriminator}: " + outcome);
     msg.reply(outcome);
   }
 });
