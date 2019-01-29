@@ -17,7 +17,12 @@ function randInt(min, max) {
 }
 
 function d10() {
-  return d10s.pop();
+  ret = d10s.pop();
+  if (typeof(ret) == 'undefined') {
+    return randInt(1, 10);
+  } else {
+    return ret;
+  }
 }
 
 function d10RefillCheck() {
