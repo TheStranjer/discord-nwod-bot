@@ -17,4 +17,4 @@ To roll 7 dice, with no rerolls:
 
 # Inviting To Your Server
 
-To invite this bot to _your_ server, just [click here](https://discordapp.com/oauth2/authorize?client_id=416850383760130049&scope=bot&permissions=68608).
+To invite this bot to _your_ server, just [click here](https://discordapp.com/oauth2/authorize?client_id=532698026570022952&permissions=2048&scope=bot).
