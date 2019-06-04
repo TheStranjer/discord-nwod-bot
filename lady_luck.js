@@ -8,9 +8,16 @@ const fs = require('fs');
 const RandomOrg = require('random-org');
 
 var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
+
+var wc = JSON.parse(fs.readFileSync('wc.json', 'utf8'));
+
 var random = new RandomOrg({ apiKey: auth.random });
 
 var d10s = [];
+
+function isAdmin(member) {
+	return member.hasPermission("ADMINISTRATOR");
+}
 
 function randInt(min, max) {
 	return min + Math.round(Math.random() * (max - min));
@@ -267,6 +274,104 @@ client.on('ready', () => {
 	}
 });
 
+function wcRem(msg, channel_id) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("This command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("Only administrators may use this command.");
+		return;
+	}
+
+	var channel = guild.channels.find(chan => chan.id == channel_id);
+
+	if (channel == null) {
+		msg.reply("Channel does not exist on this server");
+		return;
+	}
+
+	if (wc[guild.id] == null) {
+		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
+	}
+
+	if (wc[guild.id].listen_channels.includes(channel_id)) {
+		wc[guild.id].listen_channels = wc[guild.id].listen_channels.filter(function (val, ind) {
+			return val != channel_id;
+		});
+		msg.reply("The channel " + channel.name + " has been removed.");
+
+		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+	} else {
+		msg.reply("The channel " + channel.name + " isn't in the wordcount list");
+	}
+}
+
+function wcAdd(msg, channel_id) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("This command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("Only administrators may use this command.");
+		return;
+	}
+
+	if (wc[guild.id] == null) {
+		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
+	}
+
+	var channel = guild.channels.find(chan => chan.id == channel_id);
+
+	if (channel == null) {
+		msg.reply("Channel does not exist on this server");
+		return;
+	}
+
+	if (wc[guild.id].listen_channels.includes(channel_id)) {
+		msg.reply("That channel is already added.");
+	} else {
+		wc[guild.id].listen_channels.push(channel_id);
+		msg.reply("Added " + channel.name);
+		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+	}
+}
+
+function wcList(msg) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("This command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("Only administrators may use this command.");
+		return;
+	}
+
+	if (wc[guild.id] == null) {
+		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
+	}
+
+	var channels = guild.channels.filter(chan => wc[guild.id].listen_channels.includes(chan.id)).array();
+
+	if (channels.length == 0) {
+		msg.reply("This server has no wordcount channels.");
+		return;
+	}
+
+	var reply = "The wordcount channels are:\n\n";
+
+	for (i = 0; i < channels.length; i++) {
+		reply += channels[i].name + "\n";
+	}
+
+	msg.reply(reply);
+}
 client.on('message', msg => {
 	words = msg.content.split(/\s+/);
 	command = words[0].toLowerCase();
@@ -280,6 +385,12 @@ client.on('message', msg => {
 		nwodInitForceToText(msg, words[1], words[2]);
 	} else if (command === "!initclear") {
 		nwodInitClear(msg);
+	} else if (command === "!wc-add") {
+		wcAdd(msg, words[1]);
+	} else if (command === "!wc-rem") {
+		wcRem(msg, words[1]);
+	} else if (command === "!wc-list") {
+		wcList(msg);
 	}
 });
 
