@@ -402,7 +402,7 @@ function wcOOC(msg, channel_id) {
 }
 
 function wordCount(prose) {
-	return prose.match(/[\w']+/gi).length;
+	return prose.match(/[\w'’]+/gi).length;
 }
 
 function wcRA(msg, role_id) {
@@ -504,7 +504,7 @@ function wordCountConsider(msg) {
 	var wordCountCalc = wordCount(msg.content);
 	var reward = Math.floor(wordCountCalc / wc[guild.id].word_count_reward);
 
-	ooc_channel.send(msg.member.displayName + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points.");
+	ooc_channel.send(msg.author.toString() + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points.");
 }
 
 client.on('message', msg => {
