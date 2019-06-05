@@ -312,12 +312,12 @@ function wcRem(msg, channel_id) {
 function wcAdd(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("This command must be used in a guild.");
+		msg.reply("this command must be used in a guild.");
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("Only administrators may use this command.");
+		msg.reply("only administrators may use this command.");
 		return;
 	}
 
@@ -328,7 +328,7 @@ function wcAdd(msg, channel_id) {
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("Channel does not exist on this server");
+		msg.reply("channel does not exist on this server");
 		return;
 	}
 
@@ -372,6 +372,141 @@ function wcList(msg) {
 
 	msg.reply(reply);
 }
+
+function wcOOC(msg, channel_id) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("this command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("only administrators may use this command.");
+		return;
+	}
+
+	if (wc[guild.id] == null) {
+		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
+	}
+
+	var channel = guild.channels.find(chan => chan.id == channel_id);
+
+	if (channel == null) {
+		msg.reply("channel does not exist on this server");
+		return;
+	}
+
+	wc[guild.id].ooc_channel = channel.id;
+
+	msg.reply("OOC award channel set to " + channel.name);
+}
+
+function wordCount(prose) {
+	return prose.match(/[\w']+/gi).length;
+}
+
+function wcRA(msg, role_id) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("this command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("only administrators may use this command.");
+		return;
+	}
+
+	if (wc[guild.id] == null) {
+		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null, "roles" : [] };
+	}
+	
+	var role = guild.roles.find(role => role.id == role_id);
+
+	if (role == null) {
+		msg.reply("role does not exist on this server");
+		return;
+	}
+
+	if (wc[guild.id].roles == null) {
+		wc[guild.id].roles = [];
+	}
+
+	if (wc[guild.id].roles.includes(role_id)) {
+		msg.reply("That role is already added.");
+	} else {
+		wc[guild.id].roles.push(role_id);
+		msg.reply("Added " + role.name);
+		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+	}
+}
+
+function wcRR(msg, role_id) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("this command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("only administrators may use this command.");
+		return;
+	}
+
+	if (wc[guild.id] == null) {
+		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null, "roles" : [] };
+	}
+	
+
+	if (wc[guild.id].roles == null || !wc[guild.id].roles.includes(role_id)) {
+		msg.reply("Not watching users of this role");
+		return;
+	}
+
+	var role = guild.roles.find(role => role.id == role_id);
+
+	wc[guild.id].roles = wc[guild.id].roles.filter(function (val, ind) { return val != role_id });
+
+	msg.reply("Removed role " + (role ? role.name : role_id) + ".");
+
+	fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+
+}
+function wordCountConsider(msg) {
+	var guild = msg.guild;
+	if (guild == null) {
+		return;
+	}
+
+	var channel = msg.channel;
+
+	if (wc[guild.id] == null || !wc[guild.id].listen_channels.includes(channel.id)) {
+		return;
+	}
+
+	var roles = msg.member.roles.array();
+
+	if (wc[guild.id].roles == null || msg.member.roles.every(function (role) { return !wc[guild.id].roles.includes(role.id); })) {
+		return;
+	}
+
+	var ooc_channel = guild.channels.find(chan => chan.id == wc[guild.id].ooc_channel);
+
+	if (ooc_channel == null) {
+		return;
+	}
+
+	if (wc[guild.id].word_count_reward == null) {
+		wc[guild.id].word_count_reward = 50;
+		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+	}
+
+	var wordCountCalc = wordCount(msg.content);
+	var reward = Math.floor(wordCountCalc / wc[guild.id].word_count_reward);
+
+	ooc_channel.send(msg.member.displayName + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points.");
+}
+
 client.on('message', msg => {
 	words = msg.content.split(/\s+/);
 	command = words[0].toLowerCase();
@@ -389,9 +524,17 @@ client.on('message', msg => {
 		wcAdd(msg, words[1]);
 	} else if (command === "!wc-rem") {
 		wcRem(msg, words[1]);
+	} else if (command === "!wc-ooc") {
+		wcOOC(msg, words[1]);
+	} else if (command === "!wc-ra") {
+		wcRA(msg, words[1]);
+	} else if (command === "!wc-rr") {
+		wcRR(msg, words[1]);
 	} else if (command === "!wc-list") {
 		wcList(msg);
 	}
+
+ 	wordCountConsider(msg);
 });
 
 
