@@ -498,13 +498,98 @@ function wordCountConsider(msg) {
 
 	if (wc[guild.id].word_count_reward == null) {
 		wc[guild.id].word_count_reward = 50;
-		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+	}
+
+	if (wc[guild.id].users == null) {
+		wc[guild.id].users = {};
+	}
+
+	if (wc[guild.id].users[msg.author.id] == null) {
+		wc[guild.id].users[msg.author.id] = {
+			word_count: 0,
+			bonus_points: 0
+		};
 	}
 
 	var wordCountCalc = wordCount(msg.content);
-	var reward = Math.floor(wordCountCalc / wc[guild.id].word_count_reward);
+	var wordCountTotal = wc[guild.id].users[msg.author.id].word_count + wordCountCalc;
+	var reward = Math.floor(wordCountTotal / wc[guild.id].word_count_reward);
 
-	ooc_channel.send(msg.author.toString() + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points.");
+	wc[guild.id].users[msg.author.id].word_count = wordCountTotal - (wc[guild.id].word_count_reward * reward);
+	wc[guild.id].users[msg.author.id].bonus_points += reward;
+
+	ooc_channel.send(msg.author.toString() + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points. This user's total is now " + wc[guild.id].users[msg.author.id].bonus_points + ".");
+	
+	fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+}
+
+function wcForce(msg, user_id, bp_total, wc_total) {
+	if (user_id == null || isNaN(user_id)) {
+		msg.reply("You must specify the user whose total you are forcing.");
+		return;
+	}
+
+	if (bp_total == null || isNaN(bp_total) ) {
+		msg.reply("Must submit a bonus point total, and it must be a number");
+		return;
+	}
+
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("this command must be used in a guild.");
+		return;
+	}
+
+	if (!isAdmin(msg.member)) {
+		msg.reply("only administrators may use this command.");
+		return;
+	}
+
+	var user = guild.members.array().filter(member => member.user.id == user_id)[0];
+
+	if (user == null) {
+		msg.reply("that user isn't on this server.");
+		return;
+	}
+
+
+	wc[guild.id].users[user.id].bonus_points = parseInt(bp_total);
+
+	if (wc_total != null && !isNaN(wc_total)) {
+		wc[guild.id].users[user.id].word_count = parseInt(wc_total);
+	}
+
+	msg.reply(user.toString() + " now has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and a word count cache of " + wc[guild.id].users[user.id].word_count + ".")
+
+	fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+}
+
+function wcShow(msg, user_id) {
+	var guild = msg.guild;
+	if (guild == null) {
+		msg.reply("this command must be used in a guild.");
+		return;
+	}
+
+	var user = user_id == null || isNaN(user_id) ? msg.author : guild.members.array().filter(member => member.user.id == parseInt(user_id))[0].user;
+
+	if (wc[guild.id].users == null) {
+		wc[guild.id].users = { users: {} };
+	}
+
+
+	var bonus_points = wc[guild.id].users[user.id].bonus_points;
+	var word_count = wc[guild.id].users[user.id].word_count;
+
+	if (bonus_points == null || bonus_points == 0) {
+		bonus_points = "no";
+	}
+
+	if (word_count == null || word_count == 0) {
+		word_count = "no";
+	}
+
+	msg.reply(user.toString() + " has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and is " + wc[guild.id].users[user.id].word_count + " words toward their next one.");
 }
 
 client.on('message', msg => {
@@ -532,6 +617,10 @@ client.on('message', msg => {
 		wcRR(msg, words[1]);
 	} else if (command === "!wc-list") {
 		wcList(msg);
+	} else if (command === "!wc-force") {
+		wcForce(msg, words[1], words[2], words[3]);
+	} else if (command === '!wc') {
+		wcShow(msg, words[1]);
 	}
 
  	wordCountConsider(msg);
