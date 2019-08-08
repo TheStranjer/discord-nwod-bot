@@ -5,8 +5,8 @@
   "main": "bot.js",
   "author": "Luke Laupheimer",
   "dependencies": {
-    "discord.js": "^11.3.0",
-    "winston": "^2.4.0",
-    "random-org": "^0.1.6"
+    "discord.js": "^11.5.1",
+    "random-org": "github:willfrew/node-random-org#master",
+    "winston": "^2.4.0"
   }
 }

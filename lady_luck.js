@@ -11,7 +11,7 @@ var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
 
 var wc = JSON.parse(fs.readFileSync('wc.json', 'utf8'));
 
-var random = new RandomOrg({ apiKey: auth.random });
+var random = new RandomOrg({ apiKey: auth.random, endpoint: 'https://api.random.org/json-rpc/2/invoke' });
 
 var d10s = [];
 
@@ -552,6 +552,16 @@ function wcForce(msg, user_id, bp_total, wc_total) {
 		return;
 	}
 
+	if (wc[guild.id].users == null) {
+		wc[guild.id].users = {};
+	}
+
+	if (wc[guild.id].users[user.id] == null) {
+		wc[guild.id].users[user.id] = {
+			bonus_points: 0,
+			word_count: 0
+		};
+	}
 
 	wc[guild.id].users[user.id].bonus_points = parseInt(bp_total);
 
@@ -574,9 +584,15 @@ function wcShow(msg, user_id) {
 	var user = user_id == null || isNaN(user_id) ? msg.author : guild.members.array().filter(member => member.user.id == parseInt(user_id))[0].user;
 
 	if (wc[guild.id].users == null) {
-		wc[guild.id].users = { users: {} };
+		wc[guild.id].users = { users: { } };
 	}
 
+	if (wc[guild.id].users[user.id] == null) {
+		wc[guild.id].users[user.id] = {
+			bonus_points: 0,
+			word_counts: 0
+		};
+	}
 
 	var bonus_points = wc[guild.id].users[user.id].bonus_points;
 	var word_count = wc[guild.id].users[user.id].word_count;
