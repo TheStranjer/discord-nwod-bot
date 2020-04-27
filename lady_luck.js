@@ -42,13 +42,46 @@ function d10RefillCheck() {
 	}
 }
 
-function nwodRoll(pool, again) {
+function nwodRoll(pool, options) {
+	var again = 10;
+	var rote = false;
+	var botching = false;
+	var l = options ? options.length : 0;
+	for (i = 0; i < l; i++) {
+		if (options[i] == "8") {
+			again = 8;
+			continue;
+		}
+
+		if (options[i] == "9") {
+			again = 9;
+			continue;
+		}
+
+		if (options[i] == "r") {
+			rote = true;
+			continue;
+		}
+
+		if (options[i] == "b") {
+			botching = true;
+			continue;
+		}
+
+		if (options[i] == "n") {
+			again = 11;
+			continue;
+		}
+	}
+
 	var outcome = {
 		errors: [],
 		successes: 0,
 		results: [],
-		again: again == null ? 10 : parseInt(again),
-		pool: parseInt(pool)
+		pool: parseInt(pool),
+		again: again,
+		rote: rote,
+		botching: botching
 	};
 
 	if (isNaN(outcome.pool)) {
@@ -89,13 +122,16 @@ function nwodRoll(pool, again) {
 	}
 
 	for (i = 0; i < pool; i++) {
+		var free_rerolls = rote ? 1 : 0; // will start out 0 if rote action isn't enabled
 		do {
 			var result = d10();
 			if (result >= 8) {
 				outcome.successes++;
+			} else if (result == 1 && botching) {
+				outcome.successes--;
 			}
 			outcome.results.push(result);
-		} while (result >= outcome.again);
+		} while (result >= outcome.again || free_rerolls-- > 0);
 	}
 
 	d10RefillCheck();
@@ -137,11 +173,26 @@ function nwodToText(outcome) {
 			newResults[i] = "**_" + newResults[i] + "_**";
 		} else if (newResults[i] >= 8) {
 			newResults[i] = "**" + newResults[i] + "**";
+		} else if (outcome.botching && newResults[i] == 1) {
+			newResults[i] = "~~1~~";
 		}
 	}
 
+	notes = [];
+	if (outcome.again == 8 || outcome.again == 9) {
+		notes.push(outcome.again + "-Again");
+	}
+	if (outcome.botching) {
+		notes.push("Ones Botch");
+	}
+	if (outcome.rote) {
+		notes.push("Rote Action");
+	}
+	if (outcome.again == 11) {
+		notes.push("No Rerolls");
+	}
 
-	return `Rolling ${outcome.pool}${againToWords(outcome.again)}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
+	return `Rolling ${outcome.pool}${notes.length > 0 ? ' (' + notes.join(", ") + ')' : ''}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
 }
 
 function padStart(str, len, val) {
