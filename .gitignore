@@ -1,5 +1,6 @@
 *.json
 node_modules/
+nohup.out
 
 !package.json
 !package-lock.json
