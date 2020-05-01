@@ -177,13 +177,6 @@ function nwodToText(outcome) {
 	return `Rolling ${outcome.pool}${notes.length > 0 ? ' (' + notes.join(", ") + ')' : ''}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
 }
 
-function padStart(str, len, val) {
-	while (str.length < len) {
-	 str = val + str;
-	}
-	return str;
-};
-
 function generateTableContent(initTable) {
 	var ret = "**Initiative Table**\n\n```\n";
 
