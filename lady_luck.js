@@ -15,6 +15,12 @@ var random = new RandomOrg({ apiKey: auth.random, endpoint: 'https://api.random.
 
 var d10s = [];
 
+if (fs.existsSync('stored_results.json')) {
+	d10s = JSON.parse(fs.readFileSync('stored_results.json', 'utf8'));
+}
+
+var d10sold = d10s;
+
 function isAdmin(member) {
 	return member.hasPermission("ADMINISTRATOR");
 }
@@ -669,3 +675,16 @@ client.login(auth.token);
 
 initTables = {};
 
+var minute = 1000 * 60;
+
+setInterval(function () {
+	if (d10sold == d10s) {
+		return;
+	}
+
+	fs.writeFileSync('stored_results.json', JSON.stringify(d10s));
+
+	d10sold = d10s;
+
+	console.log("Updating stored results");
+}, minute);
