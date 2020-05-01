@@ -23,9 +23,7 @@ const randInt = (min,max) => min + Math.round(Math.random() * (max - min))
 
 function d10() {
 	const ret = d10s.pop();
-	return typeof ret == 'undefined'
-	  ? randInt(1, 10)
-	  : ret
+	return typeof ret == 'undefined' ? randInt(1, 10) : ret;
 }
 
 function d10RefillCheck() {
@@ -43,7 +41,7 @@ function nwodRoll(pool, options='') {
 	var rote = false;
 	var botching = false;
 
-	for (const char of options)
+	for (const char of options) {
 		switch (char) {
 			case '8':
 				again = 8;
@@ -61,6 +59,7 @@ function nwodRoll(pool, options='') {
 				again = 11;
 				break;
 		}
+	}
 
 	var outcome = {
 		errors: [],
@@ -129,16 +128,14 @@ function nwodRoll(pool, options='') {
 
 function suxxToWords(suxx) {
 	return suxx
-	  ? `${suxx} success${suxx == 1 ? '' : 'es'}`
-	  : 'No success'
+	  ? suxx + " success" + (succ == 1 ? '' : 'es')
+	  : 'No success';
 }
 
 function againToWords(again) {
 	return again == 10
 	  ? ''
-	  : again < 10
-		? ` (${again}-Again)`
-		: " (No rerolls)"
+	  : (again < 10 ? " (" + again + "-Again)" : " (No rerolls)");
 }
 
 function nwodToText(outcome) {
@@ -152,17 +149,19 @@ function nwodToText(outcome) {
 
 	var newResults = outcome.results;
 
-	for (const i in newResults)
-		if (newResults[i] >= outcome.again)
-			newResults[i] = `**_${newResults[i]}_**`;
-		else if (newResults[i] >= 8)
-			newResults[i] = `**${newResults[i]}**`
-		else if (outcome.botching && newResults[i] == 1)
-			newResults[i] == '~~1~~'
-
+	for (const i in newResults) {
+		if (newResults[i] >= outcome.again) {
+			newResults[i] = "**_" + newResults[i] + "_**";
+		} else if (newResults[i] >= 8) {
+			newResults[i] = "**" + newResults[i] + "**";
+		} else if (outcome.botching && newResults[i] == 1) {
+			newResults[i] == "~~1~~";
+		}
+	}
+	
 	notes = [];
 	if (outcome.again == 8 || outcome.again == 9) {
-		notes.push(`${outcome.again}-Again`);
+		notes.push(outcome.again + "-Again");
 	}
 	if (outcome.botching) {
 		notes.push("Ones Botch");
@@ -188,8 +187,8 @@ function generateTableContent(initTable) {
 	var padLength = chars[keys[0]].toString().length;
 
 	for (const charName in keys) {
-		var forcesText = (initTable.forces[charName] ? ` (forced by ${initTable.forces[charName]})` : "");
-		ret += `${chars[charName].toString().padStart(padLength)} : ${charName}${forcesText}\n`;
+		var forcesText = (initTable.forces[charName] ? " (forced by " + initTable.forces[charName] + ")" : "");
+		ret += chars[charName].toString().padStart(padLength) + " : " + charName + forcesText + "\n";
 	}
 
 	ret += "```";
