@@ -18,8 +18,8 @@ if (fs.existsSync('stored_results.json')) {
 
 var d10sold = d10s;
 
-const isAdmin = member => member.hasPermission("ADMINISTRATOR")
-const randInt = (min,max) => min + Math.round(Math.random() * (max - min))
+const isAdmin = member => member.hasPermission("ADMINISTRATOR");
+const randInt = (min,max) => min + Math.round(Math.random() * (max - min));
 
 function d10() {
 	const ret = d10s.pop();
@@ -141,9 +141,7 @@ function againToWords(again) {
 function nwodToText(outcome) {
 	if (outcome.errors.length > 0) {
 		return "Fate cannot adjuciate your request because: " + outcome.errors.join("; ");
-	}
-
-	if (outcome.pool < 1) {
+	} else if (outcome.pool < 1) {
 		return `Rolling a chance die with ${suxxToWords(outcome.successes)}. _Individual results:_ ${outcome.results.join(', ')}`;
 	}
 
@@ -198,7 +196,8 @@ function generateTableContent(initTable) {
 
 function nwodInitForceToText(msg, val, name) {
 	if (!/^\d+$/.test(val)) {
-		return msg.reply("Can only force the init table if given a number");
+		msg.reply("Can only force the init table if given a number");
+		return;
 	}
 
 	if (!name) {
@@ -270,17 +269,20 @@ client.on('ready', () => {
 function wcRem(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		return msg.reply("This command must be used in a guild.");
+		msg.reply("This command must be used in a guild.");
+		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		return msg.reply("Only administrators may use this command.");
+		msg.reply("Only administrators may use this command.");
+		return;
 	}
 
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		return msg.reply("Channel does not exist on this server");
+		msg.reply("Channel does not exist on this server");
+		return;
 	}
 
 	if (wc[guild.id] == null) {
@@ -303,10 +305,12 @@ function wcAdd(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
 		return msg.reply("this command must be used in a guild.");
+		return;
 	}
 
 	if (!isAdmin(msg.member)) {
 		return msg.reply("only administrators may use this command.");
+		return;
 	}
 
 	if (wc[guild.id] == null) {
@@ -317,6 +321,7 @@ function wcAdd(msg, channel_id) {
 
 	if (channel == null) {
 		return msg.reply("channel does not exist on this server");
+		return;
 	}
 
 	if (wc[guild.id].listen_channels.includes(channel_id)) {
@@ -332,10 +337,12 @@ function wcList(msg) {
 	var guild = msg.guild;
 	if (guild == null) {
 		return msg.reply("This command must be used in a guild.");
+		return;
 	}
 
 	if (!isAdmin(msg.member)) {
 		return msg.reply("Only administrators may use this command.");
+		return;
 	}
 
 	if (wc[guild.id] == null) {
@@ -361,11 +368,13 @@ function wcList(msg) {
 function wcOOC(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		return msg.reply("this command must be used in a guild.");
+		msg.reply("this command must be used in a guild.");
+		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		return msg.reply("only administrators may use this command.");
+		msg.reply("only administrators may use this command.");
+		return;
 	}
 
 	if (wc[guild.id] == null) {
@@ -375,7 +384,8 @@ function wcOOC(msg, channel_id) {
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		return msg.reply("channel does not exist on this server");
+		msg.reply("channel does not exist on this server");
+		return;
 	}
 
 	wc[guild.id].ooc_channel = channel.id;
@@ -390,11 +400,13 @@ function wordCount(prose) {
 function wcRA(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		return msg.reply("this command must be used in a guild.");
+		msg.reply("this command must be used in a guild.");
+		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		return msg.reply("only administrators may use this command.");
+		msg.reply("only administrators may use this command.");
+		return;
 	}
 
 	if (wc[guild.id] == null) {
@@ -404,7 +416,8 @@ function wcRA(msg, role_id) {
 	var role = guild.roles.find(role => role.id == role_id);
 
 	if (role == null) {
-		return msg.reply("role does not exist on this server");
+		msg.reply("role does not exist on this server");
+		return;
 	}
 
 	if (wc[guild.id].roles == null) {
@@ -423,11 +436,13 @@ function wcRA(msg, role_id) {
 function wcRR(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		return msg.reply("this command must be used in a guild.");
+		msg.reply("this command must be used in a guild.");
+		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		return msg.reply("only administrators may use this command.");
+		msg.reply("only administrators may use this command.");
+		return;
 	}
 
 	if (wc[guild.id] == null) {
@@ -436,7 +451,8 @@ function wcRR(msg, role_id) {
 	
 
 	if (wc[guild.id].roles == null || !wc[guild.id].roles.includes(role_id)) {
-		return msg.reply("Not watching users of this role");
+		msg.reply("Not watching users of this role");
+		return;
 	}
 
 	var role = guild.roles.find(role => role.id == role_id);
@@ -501,11 +517,13 @@ function wordCountConsider(msg) {
 
 function wcForce(msg, user_id, bp_total, wc_total) {
 	if (user_id == null || isNaN(user_id)) {
-		return msg.reply("You must specify the user whose total you are forcing.");
+		msg.reply("You must specify the user whose total you are forcing.");
+		return;
 	}
 
 	if (bp_total == null || isNaN(bp_total) ) {
-		return msg.reply("Must submit a bonus point total, and it must be a number");
+		msg.reply("Must submit a bonus point total, and it must be a number");
+		return;
 	}
 
 	var guild = msg.guild;
