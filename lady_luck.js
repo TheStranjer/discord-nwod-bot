@@ -304,12 +304,12 @@ function wcRem(msg, channel_id) {
 function wcAdd(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		return msg.reply("this command must be used in a guild.");
+		msg.reply("this command must be used in a guild.");
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		return msg.reply("only administrators may use this command.");
+		msg.reply("only administrators may use this command.");
 		return;
 	}
 
@@ -320,7 +320,7 @@ function wcAdd(msg, channel_id) {
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		return msg.reply("channel does not exist on this server");
+		msg.reply("channel does not exist on this server");
 		return;
 	}
 
@@ -336,12 +336,12 @@ function wcAdd(msg, channel_id) {
 function wcList(msg) {
 	var guild = msg.guild;
 	if (guild == null) {
-		return msg.reply("This command must be used in a guild.");
+		msg.reply("This command must be used in a guild.");
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		return msg.reply("Only administrators may use this command.");
+		msg.reply("Only administrators may use this command.");
 		return;
 	}
 
