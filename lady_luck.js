@@ -1,18 +1,15 @@
+const fs = require('fs');
+const RandomOrg = require('random-org');
+const Discord = require('discord.js');
+const client = new Discord.Client();
+
 console.log("Lady Luck");
 console.log("A Discord dicebot with rules ad hoceries");
 console.log("The Stranjer\n\n");
 
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const fs = require('fs');
-const RandomOrg = require('random-org');
-
 var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
-
 var wc = JSON.parse(fs.readFileSync('wc.json', 'utf8'));
-
 var random = new RandomOrg({ apiKey: auth.random, endpoint: 'https://api.random.org/json-rpc/2/invoke' });
-
 var d10s = [];
 
 if (fs.existsSync('stored_results.json')) {
@@ -21,21 +18,14 @@ if (fs.existsSync('stored_results.json')) {
 
 var d10sold = d10s;
 
-function isAdmin(member) {
-	return member.hasPermission("ADMINISTRATOR");
-}
-
-function randInt(min, max) {
-	return min + Math.round(Math.random() * (max - min));
-}
+const isAdmin = member => member.hasPermission("ADMINISTRATOR")
+const randInt = (min,max) => min + Math.round(Math.random() * (max - min))
 
 function d10() {
-	ret = d10s.pop();
-	if (typeof(ret) == 'undefined') {
-		return randInt(1, 10);
-	} else {
-		return ret;
-	}
+	const ret = d10s.pop();
+	return typeof ret == 'undefined'
+	  ? randInt(1, 10)
+	  : ret
 }
 
 function d10RefillCheck() {
@@ -48,37 +38,29 @@ function d10RefillCheck() {
 	}
 }
 
-function nwodRoll(pool, options) {
+function nwodRoll(pool, options='') {
 	var again = 10;
 	var rote = false;
 	var botching = false;
-	var l = options ? options.length : 0;
-	for (i = 0; i < l; i++) {
-		if (options[i] == "8") {
-			again = 8;
-			continue;
-		}
 
-		if (options[i] == "9") {
-			again = 9;
-			continue;
+	for (const char of options)
+		switch (char) {
+			case '8':
+				again = 8;
+				break;
+			case '9':
+				again = 9;
+				break;
+			case 'r':
+				rote = true
+				break;
+			case 'b':
+				botching = true;
+				break;
+			case 'n':
+				again = 11;
+				break;
 		}
-
-		if (options[i] == "r") {
-			rote = true;
-			continue;
-		}
-
-		if (options[i] == "b") {
-			botching = true;
-			continue;
-		}
-
-		if (options[i] == "n") {
-			again = 11;
-			continue;
-		}
-	}
 
 	var outcome = {
 		errors: [],
@@ -104,7 +86,7 @@ function nwodRoll(pool, options) {
 		outcome.errors.push("Cannot roll more than 25 dice");
 	}
 
-	if (outcome.errors.length > 0) {
+	if (outcome.errors.length) {
 		return outcome;
 	}
 
@@ -146,21 +128,17 @@ function nwodRoll(pool, options) {
 }
 
 function suxxToWords(suxx) {
-	if (suxx == 1) {
-		return "1 success";
-	} else {
-		return `${suxx == 0 ? 'No' : suxx} successes`;
-	}
+	return suxx
+	  ? `${suxx} success${suxx == 1 ? '' : 'es'}`
+	  : 'No success'
 }
 
 function againToWords(again) {
-	if (again == 10) {
-		return '';
-	} else if (again < 10) {
-		return ` (${again}-Again)`;
-	} else {
-		return " (No rerolls)";
-	}
+	return again == 10
+	  ? ''
+	  : again < 10
+		? ` (${again}-Again)`
+		: " (No rerolls)"
 }
 
 function nwodToText(outcome) {
@@ -174,19 +152,17 @@ function nwodToText(outcome) {
 
 	var newResults = outcome.results;
 
-	for (var i = 0; i < newResults.length; i++) {
-		if (newResults[i] >= outcome.again) {
-			newResults[i] = "**_" + newResults[i] + "_**";
-		} else if (newResults[i] >= 8) {
-			newResults[i] = "**" + newResults[i] + "**";
-		} else if (outcome.botching && newResults[i] == 1) {
-			newResults[i] = "~~1~~";
-		}
-	}
+	for (const i in newResults)
+		if (newResults[i] >= outcome.again)
+			newResults[i] = `**_${newResults[i]}_**`;
+		else if (newResults[i] >= 8)
+			newResults[i] = `**${newResults[i]}**`
+		else if (outcome.botching && newResults[i] == 1)
+			newResults[i] == '~~1~~'
 
 	notes = [];
 	if (outcome.again == 8 || outcome.again == 9) {
-		notes.push(outcome.again + "-Again");
+		notes.push(`${outcome.again}-Again`);
 	}
 	if (outcome.botching) {
 		notes.push("Ones Botch");
@@ -218,10 +194,10 @@ function generateTableContent(initTable) {
 
 	var padLength = chars[keys[0]].toString().length;
 
-	keys.forEach(function(charName) {
-		var forcesText = (initTable.forces[charName] ? " (forced by " + initTable.forces[charName] + ")" : "");
-		ret += padStart(chars[charName].toString(), padLength, " ") + " : " + charName + forcesText + "\n";
-	});
+	for (const charName in keys) {
+		var forcesText = (initTable.forces[charName] ? ` (forced by ${initTable.forces[charName]})` : "");
+		ret += `${chars[charName].toString().padStart(padLength)} : ${charName}${forcesText}\n`;
+	}
 
 	ret += "```";
 
@@ -230,8 +206,7 @@ function generateTableContent(initTable) {
 
 function nwodInitForceToText(msg, val, name) {
 	if (!/^\d+$/.test(val)) {
-		msg.reply("Can only force the init table if given a number");
-		return;
+		return msg.reply("Can only force the init table if given a number");
 	}
 
 	if (!name) {
@@ -303,20 +278,17 @@ client.on('ready', () => {
 function wcRem(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("This command must be used in a guild.");
-		return;
+		return msg.reply("This command must be used in a guild.");
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("Only administrators may use this command.");
-		return;
+		return msg.reply("Only administrators may use this command.");
 	}
 
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("Channel does not exist on this server");
-		return;
+		return msg.reply("Channel does not exist on this server");
 	}
 
 	if (wc[guild.id] == null) {
@@ -338,13 +310,11 @@ function wcRem(msg, channel_id) {
 function wcAdd(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
-		return;
+		return msg.reply("this command must be used in a guild.");
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
-		return;
+		return msg.reply("only administrators may use this command.");
 	}
 
 	if (wc[guild.id] == null) {
@@ -354,8 +324,7 @@ function wcAdd(msg, channel_id) {
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("channel does not exist on this server");
-		return;
+		return msg.reply("channel does not exist on this server");
 	}
 
 	if (wc[guild.id].listen_channels.includes(channel_id)) {
@@ -370,13 +339,11 @@ function wcAdd(msg, channel_id) {
 function wcList(msg) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("This command must be used in a guild.");
-		return;
+		return msg.reply("This command must be used in a guild.");
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("Only administrators may use this command.");
-		return;
+		return msg.reply("Only administrators may use this command.");
 	}
 
 	if (wc[guild.id] == null) {
@@ -402,13 +369,11 @@ function wcList(msg) {
 function wcOOC(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
-		return;
+		return msg.reply("this command must be used in a guild.");
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
-		return;
+		return msg.reply("only administrators may use this command.");
 	}
 
 	if (wc[guild.id] == null) {
@@ -418,8 +383,7 @@ function wcOOC(msg, channel_id) {
 	var channel = guild.channels.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("channel does not exist on this server");
-		return;
+		return msg.reply("channel does not exist on this server");
 	}
 
 	wc[guild.id].ooc_channel = channel.id;
@@ -434,13 +398,11 @@ function wordCount(prose) {
 function wcRA(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
-		return;
+		return msg.reply("this command must be used in a guild.");
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
-		return;
+		return msg.reply("only administrators may use this command.");
 	}
 
 	if (wc[guild.id] == null) {
@@ -450,8 +412,7 @@ function wcRA(msg, role_id) {
 	var role = guild.roles.find(role => role.id == role_id);
 
 	if (role == null) {
-		msg.reply("role does not exist on this server");
-		return;
+		return msg.reply("role does not exist on this server");
 	}
 
 	if (wc[guild.id].roles == null) {
@@ -470,13 +431,11 @@ function wcRA(msg, role_id) {
 function wcRR(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
-		return;
+		return msg.reply("this command must be used in a guild.");
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
-		return;
+		return msg.reply("only administrators may use this command.");
 	}
 
 	if (wc[guild.id] == null) {
@@ -485,8 +444,7 @@ function wcRR(msg, role_id) {
 	
 
 	if (wc[guild.id].roles == null || !wc[guild.id].roles.includes(role_id)) {
-		msg.reply("Not watching users of this role");
-		return;
+		return msg.reply("Not watching users of this role");
 	}
 
 	var role = guild.roles.find(role => role.id == role_id);
@@ -551,13 +509,11 @@ function wordCountConsider(msg) {
 
 function wcForce(msg, user_id, bp_total, wc_total) {
 	if (user_id == null || isNaN(user_id)) {
-		msg.reply("You must specify the user whose total you are forcing.");
-		return;
+		return msg.reply("You must specify the user whose total you are forcing.");
 	}
 
 	if (bp_total == null || isNaN(bp_total) ) {
-		msg.reply("Must submit a bonus point total, and it must be a number");
-		return;
+		return msg.reply("Must submit a bonus point total, and it must be a number");
 	}
 
 	var guild = msg.guild;
@@ -634,38 +590,52 @@ function wcShow(msg, user_id) {
 	msg.reply(user.toString() + " has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and is " + wc[guild.id].users[user.id].word_count + " words toward their next one.");
 }
 
-client.on('message', msg => {
-	words = msg.content.split(/\s+/);
-	command = words[0].toLowerCase();
-	if (command === '!nwod') {
-		var outcome = nwodToText(nwodRoll(words[1], words[2]));
-		console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${outcome}`)
-		msg.reply(outcome);
-	} else if (command == "!init") {
-		nwodInitToText(msg, words[1], words[2]);
-	} else if (command === "!initforce") {
-		nwodInitForceToText(msg, words[1], words[2]);
-	} else if (command === "!initclear") {
-		nwodInitClear(msg);
-	} else if (command === "!wc-add") {
-		wcAdd(msg, words[1]);
-	} else if (command === "!wc-rem") {
-		wcRem(msg, words[1]);
-	} else if (command === "!wc-ooc") {
-		wcOOC(msg, words[1]);
-	} else if (command === "!wc-ra") {
-		wcRA(msg, words[1]);
-	} else if (command === "!wc-rr") {
-		wcRR(msg, words[1]);
-	} else if (command === "!wc-list") {
-		wcList(msg);
-	} else if (command === "!wc-force") {
-		wcForce(msg, words[1], words[2], words[3]);
-	} else if (command === '!wc') {
-		wcShow(msg, words[1]);
+client.on('message', function (m) {
+	const words = msg.content.split(/\s+/);
+	const command = words[0].toLowerCase();
+
+	switch (command) {
+		case '!nwod':
+			const outcome = nwodToText(nwodRoll(words[1], words[2]));
+			console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${outcome}`);
+			msg.reply(outcome);
+			break;
+		case '!init':
+			nwodInitToText(msg, words[1], words[2]);
+			break;
+		case '!initforce':
+			nwodInitForceToText(msg, words[1], words[2]);
+			break;
+		case '!initclear':
+			nwodInitClear(msg);
+			break;
+		case '!wc-add':
+			wcAdd(msg, words[1]);
+			break;
+		case '!wc-rem':
+			wcRem(msg, words[1]);
+			break;
+		case '!wc-ooc':
+			wcOOC(msg, words[1]);
+			break;
+		case '!wc-ra':
+			wcRA(msg, words[1]);
+			break;
+		case '!wc-rr':
+			wcRR(msg, words[1]);
+			break;
+		case '!wc-list':
+			wcList(msg);
+			break;
+		case '!wc-force':
+			wcForce(msg, words[1], words[2], words[3]);
+			break;
+		case '!wc':
+			wcShow(msg, words[1]);
+			break;
 	}
 
- 	wordCountConsider(msg);
+	wordCountConsider(msg);
 });
 
 
