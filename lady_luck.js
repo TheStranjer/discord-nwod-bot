@@ -128,7 +128,7 @@ function nwodRoll(pool, options='') {
 
 function suxxToWords(suxx) {
 	return suxx
-	  ? suxx + " success" + (succ == 1 ? '' : 'es')
+	  ? suxx + " success" + (suxx == 1 ? '' : 'es')
 	  : 'No success';
 }
 
@@ -600,7 +600,7 @@ function wcShow(msg, user_id) {
 	msg.reply(user.toString() + " has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and is " + wc[guild.id].users[user.id].word_count + " words toward their next one.");
 }
 
-client.on('message', function (m) {
+client.on('message', function (msg) {
 	const words = msg.content.split(/\s+/);
 	const command = words[0].toLowerCase();
 
