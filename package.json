@@ -5,8 +5,14 @@
   "main": "bot.js",
   "author": "Luke Laupheimer",
   "dependencies": {
-    "discord.js": "^11.5.1",
+    "discord.js": "github:discordjs/discord.js#master",
     "random-org": "github:willfrew/node-random-org#master",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "bufferutil": "^4.0.1",
+    "erlpack": "discordapp/erlpack",
+    "libsodium-wrappers": "^0.7.6",
+    "utf-8-validate": "^5.0.2",
+    "zlib-sync": "^0.1.6"
+
   }
 }

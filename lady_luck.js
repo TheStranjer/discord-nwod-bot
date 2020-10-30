@@ -184,7 +184,8 @@ function generateTableContent(initTable) {
 
 	var padLength = chars[keys[0]].toString().length;
 
-	for (const charName in keys) {
+	for (const charIndex in keys) {
+		charName = keys[charIndex];
 		var forcesText = (initTable.forces[charName] ? " (forced by " + initTable.forces[charName] + ")" : "");
 		ret += chars[charName].toString().padStart(padLength) + " : " + charName + forcesText + "\n";
 	}
@@ -278,7 +279,7 @@ function wcRem(msg, channel_id) {
 		return;
 	}
 
-	var channel = guild.channels.find(chan => chan.id == channel_id);
+	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
 		msg.reply("Channel does not exist on this server");
@@ -317,7 +318,7 @@ function wcAdd(msg, channel_id) {
 		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
 	}
 
-	var channel = guild.channels.find(chan => chan.id == channel_id);
+	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
 		msg.reply("channel does not exist on this server");
@@ -349,7 +350,7 @@ function wcList(msg) {
 		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
 	}
 
-	var channels = guild.channels.filter(chan => wc[guild.id].listen_channels.includes(chan.id)).array();
+	var channels = guild.channels.cache.filter(chan => wc[guild.id].listen_channels.includes(chan.id)).array();
 
 	if (channels.length == 0) {
 		msg.reply("This server has no wordcount channels.");
@@ -381,7 +382,7 @@ function wcOOC(msg, channel_id) {
 		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null };
 	}
 
-	var channel = guild.channels.find(chan => chan.id == channel_id);
+	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
 		msg.reply("channel does not exist on this server");
@@ -413,24 +414,24 @@ function wcRA(msg, role_id) {
 		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null, "roles" : [] };
 	}
 	
-	var role = guild.roles.find(role => role.id == role_id);
-
-	if (role == null) {
-		msg.reply("role does not exist on this server");
-		return;
-	}
-
-	if (wc[guild.id].roles == null) {
-		wc[guild.id].roles = [];
-	}
-
-	if (wc[guild.id].roles.includes(role_id)) {
-		msg.reply("That role is already added.");
-	} else {
-		wc[guild.id].roles.push(role_id);
-		msg.reply("Added " + role.name);
-		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
-	}
+	guild.roles.fetch(role_id).then(role => {
+		if (role == null) {
+			msg.reply("role does not exist on this server");
+			return;
+		}
+	
+		if (wc[guild.id].roles == null) {
+			wc[guild.id].roles = [];
+		}
+	
+		if (wc[guild.id].roles.includes(role_id)) {
+			msg.reply("That role is already added.");
+		} else {
+			wc[guild.id].roles.push(role_id);
+			msg.reply("Added " + role.name);
+			fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+		}
+	});
 }
 
 function wcRR(msg, role_id) {
@@ -449,19 +450,13 @@ function wcRR(msg, role_id) {
 		wc[guild.id] = { "listen_channels" : [], "ooc_channel" : null, "roles" : [] };
 	}
 	
+	guild.roles.fetch(role_id).then(role => {
+		wc[guild.id].roles = wc[guild.id].roles.filter(function (val, ind) { return val != role_id });
 
-	if (wc[guild.id].roles == null || !wc[guild.id].roles.includes(role_id)) {
-		msg.reply("Not watching users of this role");
-		return;
-	}
+		msg.reply("Removed role " + (role ? role.name : role_id) + ".");
 
-	var role = guild.roles.find(role => role.id == role_id);
-
-	wc[guild.id].roles = wc[guild.id].roles.filter(function (val, ind) { return val != role_id });
-
-	msg.reply("Removed role " + (role ? role.name : role_id) + ".");
-
-	fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
+	});
 
 }
 function wordCountConsider(msg) {
@@ -476,13 +471,13 @@ function wordCountConsider(msg) {
 		return;
 	}
 
-	var roles = msg.member.roles.array();
+	var roles = msg.member.roles.cache.array();
 
-	if (wc[guild.id].roles == null || msg.member.roles.every(function (role) { return !wc[guild.id].roles.includes(role.id); })) {
+	if (wc[guild.id].roles == null || msg.member.roles.cache.every(function (role) { return !wc[guild.id].roles.includes(role.id); })) {
 		return;
 	}
 
-	var ooc_channel = guild.channels.find(chan => chan.id == wc[guild.id].ooc_channel);
+	var ooc_channel = guild.channels.cache.find(chan => chan.id == wc[guild.id].ooc_channel);
 
 	if (ooc_channel == null) {
 		return;
@@ -546,7 +541,7 @@ function wcForce(msg, user_id, bp_total, wc_total) {
 		return;
 	}
 
-	var user = guild.members.array().filter(member => member.user.id == user_id)[0];
+	var user = guild.members.cache.array().filter(member => member.user.id == user_id)[0];
 
 	if (user == null) {
 		msg.reply("that user isn't on this server.");
@@ -582,7 +577,7 @@ function wcShow(msg, user_id) {
 		return;
 	}
 
-	var user = user_id == null || isNaN(user_id) ? msg.author : guild.members.array().filter(member => member.user.id == parseInt(user_id))[0].user;
+	var user = user_id == null || isNaN(user_id) ? msg.author : guild.members.cache.array().filter(member => member.user.id == parseInt(user_id))[0].user;
 
 	if (wc[guild.id].users == null) {
 		wc[guild.id].users = { users: { } };
