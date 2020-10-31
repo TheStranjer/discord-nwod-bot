@@ -469,7 +469,7 @@ function wordCountConsider(msg) {
 
 	var channel = msg.channel;
 
-	if (wc[guild.id] == null || !wc[guild.id].listen_channels.includes(channel.id)) {
+	if (wc[guild.id] == null || !wc[guild.id].listen_channels.includes(channel.id.toString())) {
 		return;
 	}
 
