@@ -395,7 +395,9 @@ function wcOOC(msg, channel_id) {
 }
 
 function wordCount(prose) {
-	return prose === null ? 0 : prose.match(/[\w'’]+/gi).length;
+	let length = prose.match(/[\w'’]+/gi);
+	length = length == null ? 0 : length.length;
+	return length;
 }
 
 function wcRA(msg, role_id) {
