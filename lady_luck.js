@@ -581,7 +581,7 @@ function wcShow(msg, user_id) {
 
 	var user = user_id == null || isNaN(user_id) ? msg.author : guild.members.cache.array().filter(member => member.user.id == parseInt(user_id))[0].user;
 
-	if (wc[guild.id].users == null) {
+	if (wc[guild.id] == null || wc[guild.id].users == null) {
 		wc[guild.id].users = { users: { } };
 	}
 
