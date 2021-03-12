@@ -513,7 +513,7 @@ function wordCountConsider(msg) {
 	
 	var now = Math.floor(Date.now() / 1000);
 
-	if (now > wc[guild.id].users[msg.author.id].last_sent) {
+	if (reward > 0 && now > wc[guild.id].users[msg.author.id].last_sent) {
 		ooc_channel.send(msg.author.toString() + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points. This user's total is now " + wc[guild.id].users[msg.author.id].bonus_points + ".");
 		wc[guild.id].users[msg.author.id].last_sent = now + 3600;
 	}
