@@ -5,14 +5,13 @@
   "main": "bot.js",
   "author": "Luke Laupheimer",
   "dependencies": {
+    "bufferutil": "^4.0.3",
     "discord.js": "github:discordjs/discord.js#master",
+    "erlpack": "github:discordapp/erlpack",
+    "libsodium-wrappers": "^0.7.9",
     "random-org": "github:willfrew/node-random-org#master",
-    "winston": "^2.4.0",
-    "bufferutil": "^4.0.1",
-    "erlpack": "discordapp/erlpack",
-    "libsodium-wrappers": "^0.7.6",
-    "utf-8-validate": "^5.0.2",
-    "zlib-sync": "^0.1.6"
-
+    "utf-8-validate": "^5.0.4",
+    "winston": "^2.4.5",
+    "zlib-sync": "^0.1.7"
   }
 }
