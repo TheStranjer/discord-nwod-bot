@@ -1,7 +1,6 @@
 const fs = require('fs');
 const RandomOrg = require('random-org');
-const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, Intents } = require('discord.js');
 
 console.log("Lady Luck");
 console.log("A Discord dicebot with rules ad hoceries");
@@ -263,9 +262,10 @@ function nwodInitClear(msg) {
 	initTables[channelId] = { characters: {}, forces: {} };
 }
 
-client.on('ready', () => {
-	console.log(` logged in as ${client.user.tag}!`);
-});
+function on_ready(client) {
+	console.log(` logged in as ${this.user.tag}!`);
+}
+
 
 function wcRem(msg, channel_id) {
 	var guild = msg.guild;
@@ -610,7 +610,7 @@ function wcShow(msg, user_id) {
 	msg.reply(user.toString() + " has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and is " + wc[guild.id].users[user.id].word_count + " words toward their next one.");
 }
 
-client.on('message', function (msg) {
+function handle_message(msg) {
 	const words = msg.content.split(/\s+/);
 	const command = words[0].toLowerCase();
 
@@ -656,12 +656,19 @@ client.on('message', function (msg) {
 	}
 
 	wordCountConsider(msg);
-});
+}
 
+var clients = [];
+
+for (const token of auth.token) {
+	const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+	process.stdout.write("Logging in now...");
+	client.on('message', handle_message);
+	client.on('ready', on_ready);
+	client.login(token);
+}
 
 d10RefillCheck();
-process.stdout.write("Logging in now...");
-client.login(auth.token);
 
 initTables = {};
 
