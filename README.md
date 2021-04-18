@@ -68,4 +68,4 @@ To show your or another user's Word Count and Bonus Point count:
 
 # Inviting To Your Server
 
-To invite this bot to _your_ server, just [click here](https://discordapp.com/oauth2/authorize?client_id=532698026570022952&permissions=2048&scope=bot).
+To invite this bot to _your_ server, just [click here](https://discordapp.com/oauth2/authorize?client_id=833128867282681887&permissions=2048&scope=bot).
