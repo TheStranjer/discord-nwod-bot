@@ -17,7 +17,7 @@ if (fs.existsSync('stored_results.json')) {
 
 var d10sold = d10s;
 
-const isAdmin = member => member.hasPermission("ADMINISTRATOR");
+const isAdmin = member => member.permissions.has("ADMINISTRATOR");
 const randInt = (min,max) => min + Math.round(Math.random() * (max - min));
 
 function d10() {
