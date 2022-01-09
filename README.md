@@ -17,7 +17,7 @@ To roll 7 dice, with 8-Again:
 `!nwod 7 8`
 
 To roll 7 dice, with no rerolls:
-`!nwod 7 11`
+`!nwod 7 n`
 
 ## Initiative Rolls
 
