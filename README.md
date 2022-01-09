@@ -19,6 +19,15 @@ To roll 7 dice, with 8-Again:
 To roll 7 dice, with no rerolls:
 `!nwod 7 n`
 
+To roll with rote action:
+`!nwod 7 r`
+
+To roll with botching:
+`!nwod 7 b`
+
+You can combine any of the options aside from the Again rules. For example, to roll with 8-Again and botching:
+`!nwod 7 8b`
+
 ## Initiative Rolls
 
 To roll initiative:
