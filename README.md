@@ -75,6 +75,21 @@ To show your or another user's Word Count and Bonus Point count:
 `!wc [<user-id>]`
 `!wc 652113678398494975`
 
+## Vampire: the Masquerade, Dark Ages, 20th Edition
+
+DAV20 dice succeed when the roll outcome is above the difficulty, and offer two successes on 10s rather than exploding. It also botches on 1s.
+
+To roll:
+
+`!dav20 <pool> <difficulty> [<options>]`
+
+Example: `!dav20 12 6`
+
+Available Options:
+
+* `n` -- No Botching
+* `w` -- Use willpower for an automatic success
+
 # Inviting To Your Server
 
 To invite this bot to _your_ server, just [click here](https://discordapp.com/oauth2/authorize?client_id=833128867282681887&permissions=2048&scope=bot).

@@ -25,6 +25,10 @@ function d10() {
 	return typeof ret == 'undefined' ? randInt(1, 10) : ret;
 }
 
+function unique(value, index, self) {
+	return self.indexOf(value) === index;
+}
+
 function d10RefillCheck() {
 	if (d10s.length < 100) {
 		console.log(`d10s have ${d10s.length} left. Refilling...`);
@@ -33,6 +37,39 @@ function d10RefillCheck() {
 			console.log(`d10s now at ${d10s.length}.`);
 		});
 	}
+}
+
+function dav20Roll(pool, difficulty, options) {
+	const optionsArray = `${options}`.toLowerCase().split('').filter(unique);
+
+	var outcome = {
+		results: [],
+		errors: [],
+		pool: parseInt(pool),
+		botching: !optionsArray.some(opt => opt == 'n'),
+		willpower: optionsArray.some(opt => opt == 'w'),
+		difficulty: parseInt(difficulty)
+	};
+
+	if (isNaN(outcome.pool) || outcome.pool > 25 || outcome.pool < 1) {
+		outcome.errors.push("Pool must be a number between 1 and 25");
+	}
+
+	if (isNaN(outcome.difficulty) || outcome.difficulty > 10 || outcome.difficulty < 1) {
+		outcome.errors.push("Must assign a difficulty between 1 and 10");
+	}
+
+	for (var i = 0; i < pool; i++) {
+		outcome.results.push(d10());
+	}
+
+	d10RefillCheck();
+
+	outcome.botches = outcome.botching ? outcome.results.filter(res => res == 1).length : 0;
+	outcome.hits = outcome.results.filter(res => res >= difficulty).length;
+	outcome.successes = outcome.hits - outcome.botches + outcome.results.filter(res => res == 10).length + (outcome.willpower ? 1 : 0);
+
+	return outcome;
 }
 
 function nwodRoll(pool, options='') {
@@ -135,6 +172,47 @@ function againToWords(again) {
 	return again == 10
 	  ? ''
 	  : (again < 10 ? " (" + again + "-Again)" : " (No rerolls)");
+}
+
+function dav20ToText(outcome) {
+	if (outcome.errors.length > 0) {
+		return "Fate cannot adjudicate your request because: " + outcome.errors.join("; ");
+	}
+
+	const prettyResults = outcome.results.map(function (res) {
+		if (res >= outcome.difficulty) {
+			return `**${res}**`;
+		}
+
+		if (outcome.botching && res == 1) {
+			return `~~${res}~~`;
+		}
+
+		return `${res}`;
+	});
+
+	var outcomeType = '';
+	if (outcome.successes > 1) {
+		outcomeType = `${outcome.successes} Successes!`;
+	} else if (outcome.successes == 1) {
+		outcomeType = `Single successes!`;
+	} else if (outcome.botches > 0) {
+		outcomeType = 'Botch!';
+	} else {
+		outcomeType = 'Failure...';
+	}
+
+	notes = [];
+
+	if (!outcome.botching) {
+		notes.push("No Botches");
+	}
+
+	if (outcome.willpower) {
+		notes.push("Using willpower");
+	}
+
+	return `**Outcome:** ${outcomeType}\n**Pool:** ${outcome.pool}\n**Difficulty:** ${outcome.difficulty}\n**Results:** ${prettyResults.join(', ')}\n**Options:** ${notes.length > 0 ? notes.join(', ') : 'None'}`;
 }
 
 function nwodToText(outcome) {
@@ -616,9 +694,14 @@ function handle_message(msg) {
 
 	switch (command) {
 		case '!nwod':
-			const outcome = nwodToText(nwodRoll(words[1], words[2]));
-			console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${outcome}`);
-			msg.reply(outcome);
+			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2]));
+			console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${nWoDoutcome}`);
+			msg.reply(nWoDoutcome);
+			break;
+		case '!dav20':
+			const dav20outcome = dav20ToText(dav20Roll(words[1], words[2], words[3]));
+			console.log(`New dav20 roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${dav20outcome}`);
+			msg.reply(dav20outcome);
 			break;
 		case '!init':
 			nwodInitToText(msg, words[1], words[2]);
