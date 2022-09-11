@@ -40,7 +40,7 @@ function d10RefillCheck() {
 }
 
 function dav20Roll(pool, difficulty, options) {
-	const optionsArray = `${options}`.toLowerCase().split('').filter(unique);
+	const optionsArray = options ? options.toLowerCase().split('').filter(unique) : [];
 
 	var outcome = {
 		results: [],
