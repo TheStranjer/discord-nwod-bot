@@ -48,6 +48,7 @@ function dav20Roll(pool, difficulty, options) {
 		pool: parseInt(pool),
 		botching: !optionsArray.some(opt => opt == 'n'),
 		willpower: optionsArray.some(opt => opt == 'w'),
+		specialty: optionsArray.some(opt => opt == 's'),
 		difficulty: parseInt(difficulty)
 	};
 
@@ -67,7 +68,9 @@ function dav20Roll(pool, difficulty, options) {
 
 	outcome.botches = outcome.botching ? outcome.results.filter(res => res == 1).length : 0;
 	outcome.hits = outcome.results.filter(res => res >= difficulty).length;
-	outcome.successes = outcome.hits - outcome.botches + outcome.results.filter(res => res == 10).length + (outcome.willpower ? 1 : 0);
+	outcome.successes = outcome.hits - outcome.botches;
+	outcome.successes += outcome.specialty ? outcome.results.filter(res => res == 10).length : 0;
+	outcome.successes = outcome.willpower ? Math.max(outcome.successes + 1, 1) : outcome.successes;
 
 	return outcome;
 }
@@ -210,6 +213,10 @@ function dav20ToText(outcome) {
 
 	if (outcome.willpower) {
 		notes.push("Using willpower");
+	}
+
+	if (outcome.specialty) {
+		notes.push("Using Specialty");
 	}
 
 	return `**Outcome:** ${outcomeType}\n**Pool:** ${outcome.pool}\n**Difficulty:** ${outcome.difficulty}\n**Results:** ${prettyResults.join(', ')}\n**Options:** ${notes.length > 0 ? notes.join(', ') : 'None'}`;

@@ -77,7 +77,7 @@ To show your or another user's Word Count and Bonus Point count:
 
 ## Vampire: the Masquerade, Dark Ages, 20th Edition
 
-DAV20 dice succeed when the roll outcome is above the difficulty, and offer two successes on 10s rather than exploding. It also botches on 1s.
+DAV20 dice succeed when the roll outcome is above the difficulty, and don't explode on 10s. It also botches on 1s.
 
 To roll:
 
@@ -89,6 +89,7 @@ Available Options:
 
 * `n` -- No Botching
 * `w` -- Use willpower for an automatic success
+* `s` -- A specialty is used (10s get two successes)
 
 # Inviting To Your Server
 
