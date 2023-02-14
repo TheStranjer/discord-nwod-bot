@@ -199,7 +199,7 @@ function dav20ToText(outcome) {
 		outcomeType = `${outcome.successes} Successes!`;
 	} else if (outcome.successes == 1) {
 		outcomeType = `Single successes!`;
-	} else if (outcome.botches > 0) {
+	} else if (outcome.botches > 0 && outcome.hits == 0) {
 		outcomeType = 'Botch!';
 	} else {
 		outcomeType = 'Failure...';
