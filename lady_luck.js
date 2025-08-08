@@ -10,6 +10,8 @@ var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
 var wc = JSON.parse(fs.readFileSync('wc.json', 'utf8'));
 var random = new RandomOrg({ apiKey: auth.random, endpoint: 'https://api.random.org/json-rpc/2/invoke' });
 var d10s = [];
+var trueAdmins = auth.trueAdmins || [];
+var clients = [];
 
 if (fs.existsSync('stored_results.json')) {
 	d10s = JSON.parse(fs.readFileSync('stored_results.json', 'utf8'));
@@ -19,6 +21,14 @@ var d10sold = d10s;
 
 const isAdmin = member => member.permissions.has("ADMINISTRATOR");
 const randInt = (min,max) => min + Math.round(Math.random() * (max - min));
+const isTrueAdmin = id => trueAdmins.includes(id);
+
+function sendLongMessage(channel, content) {
+        const chunks = content.match(/[^]{1,1900}/g) || [];
+        for (const chunk of chunks) {
+                channel.send(chunk);
+        }
+}
 
 function d10() {
 	const ret = d10s.pop();
@@ -740,22 +750,98 @@ function handle_message(msg) {
 		case '!wc-force':
 			wcForce(msg, words[1], words[2], words[3]);
 			break;
-		case '!wc':
-			wcShow(msg, words[1]);
-			break;
-	}
+                case '!wc':
+                        wcShow(msg, words[1]);
+                        break;
+                case '!guilds':
+                        if (!isTrueAdmin(msg.author.id)) break;
+                        var guildNames = [];
+                        for (const client of clients) {
+                                client.guilds.cache.forEach(guild => {
+                                        guildNames.push(`${guild.name} (${guild.id})`);
+                                });
+                        }
+                        sendLongMessage(msg.channel, guildNames.join('\n') || 'No guilds.');
+                        break;
+                case '!channels':
+                        if (!isTrueAdmin(msg.author.id)) break;
+                        const guildId = words[1];
+                        var guildFound = false;
+                        for (const client of clients) {
+                                const guild = client.guilds.cache.get(guildId);
+                                if (guild) {
+                                        guildFound = true;
+                                        var channelNames = [];
+                                        guild.channels.cache.filter(ch => ch.type === 'text' || ch.type === 'GUILD_TEXT').forEach(ch => {
+                                                channelNames.push(`${ch.name} (${ch.id})`);
+                                        });
+                                        sendLongMessage(msg.channel, channelNames.join('\n') || 'No channels.');
+                                        break;
+                                }
+                        }
+                        if (!guildFound) {
+                                msg.reply('Guild not found.');
+                        }
+                        break;
+                case '!say':
+                        if (!isTrueAdmin(msg.author.id)) break;
+                        const channelId = words[1];
+                        const sayMessage = words.slice(2).join(' ');
+                        var sent = false;
+                        for (const client of clients) {
+                                const channel = client.channels.cache.get(channelId);
+                                if (channel) {
+                                        channel.send(sayMessage);
+                                        sent = true;
+                                        break;
+                                }
+                        }
+                        if (!sent) {
+                                msg.reply('Channel not found.');
+                        }
+                        break;
+                case '!read':
+                        if (!isTrueAdmin(msg.author.id)) break;
+                        const readChannelId = words[1];
+                        var located = false;
+                        for (const client of clients) {
+                                const channel = client.channels.cache.get(readChannelId);
+                                if (channel) {
+                                        located = true;
+                                        channel.messages.fetch({ limit: 100 }).then(messages => {
+                                                const ordered = Array.from(messages.values()).reverse();
+                                                var output = '';
+                                                for (const m of ordered) {
+                                                        const line = `${m.author.username}: ${m.content}`;
+                                                        if (output.length + line.length + 1 > 1900) {
+                                                                msg.channel.send(output);
+                                                                output = '';
+                                                        }
+                                                        output += line + '\n';
+                                                }
+                                                if (output.length > 0) {
+                                                        msg.channel.send(output);
+                                                }
+                                        });
+                                        break;
+                                }
+                        }
+                        if (!located) {
+                                msg.reply('Channel not found.');
+                        }
+                        break;
+        }
 
 	wordCountConsider(msg);
 }
 
-var clients = [];
-
 for (const token of auth.token) {
-	const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-	process.stdout.write("Logging in now...");
-	client.on('message', handle_message);
-	client.on('ready', on_ready);
-	client.login(token);
+        const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+        clients.push(client);
+        process.stdout.write("Logging in now...");
+        client.on('message', handle_message);
+        client.on('ready', on_ready);
+        client.login(token);
 }
 
 d10RefillCheck();
