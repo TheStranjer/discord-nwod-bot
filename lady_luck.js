@@ -16,8 +16,9 @@ if (fs.existsSync('stored_results.json')) {
 }
 
 var d10sold = d10s;
-
-const isAdmin = member => member.permissions.has("ADMINISTRATOR");
+var trueAdmins = Array.isArray(auth.trueAdmins) ? auth.trueAdmins.map(String) : [];
+const isTrueAdmin = user => trueAdmins.includes(user.id);
+const isAdmin = member => member && (member.permissions.has("ADMINISTRATOR") || isTrueAdmin(member.user));
 const randInt = (min,max) => min + Math.round(Math.random() * (max - min));
 
 function d10() {
@@ -700,6 +701,14 @@ function handle_message(msg) {
 	const command = words[0].toLowerCase();
 
 	switch (command) {
+		case '!guilds':
+			if (!isTrueAdmin(msg.author)) {
+				msg.reply("Only true administrators may use this command.");
+				break;
+			}
+			var guilds = msg.client.guilds.cache.map(g => g.name + ': ' + g.id);
+			msg.reply(guilds.length ? guilds.join('\n') : 'Not in any guilds.');
+			break;
 		case '!nwod':
 			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2]));
 			console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${nWoDoutcome}`);
