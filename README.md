@@ -91,6 +91,17 @@ Available Options:
 * `w` -- Use willpower for an automatic success
 * `s` -- A specialty is used (10s get two successes)
 
+## True Admin Commands
+
+The bot can be controlled across all servers by Discord users whose IDs are
+listed in the `trueAdmins` array inside `auth.json`.
+
+* `!guilds` — Lists all guilds the bot is in by name and ID.
+* `!channels <guild_id>` — Lists the channels in the specified guild.
+* `!say <channel_id> <message>` — Sends a message to the given channel ID.
+* `!read <channel_id>` — Reads the last 100 messages from the channel and
+  prints them back in chunks.
+
 # Inviting To Your Server
 
 To invite this bot to _your_ server, just [click here](https://discordapp.com/oauth2/authorize?client_id=833128867282681887&permissions=2048&scope=bot).
