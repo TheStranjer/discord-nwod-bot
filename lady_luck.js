@@ -811,14 +811,15 @@ function handle_message(msg) {
                                         channel.messages.fetch({ limit: 100 }).then(messages => {
                                                 const ordered = Array.from(messages.values()).reverse();
                                                 var output = '';
-                                                for (const m of ordered) {
-                                                        const line = `${m.author.username}: ${m.content}`;
-                                                        if (output.length + line.length + 1 > 1900) {
-                                                                msg.channel.send(output);
-                                                                output = '';
-                                                        }
-                                                        output += line + '\n';
-                                                }
+                                               for (const m of ordered) {
+                                                       const timestamp = m.createdAt ? m.createdAt.toISOString() : new Date(m.createdTimestamp).toISOString();
+                                                       const line = `${timestamp} (${m.id}) ${m.author.username}: ${m.content}`;
+                                                       if (output.length + line.length + 1 > 1900) {
+                                                               msg.channel.send(output);
+                                                               output = '';
+                                                       }
+                                                       output += line + '\n';
+                                               }
                                                 if (output.length > 0) {
                                                         msg.channel.send(output);
                                                 }
