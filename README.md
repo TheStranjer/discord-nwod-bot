@@ -98,10 +98,9 @@ listed in the `trueAdmins` array inside `auth.json`.
 
 * `!guilds` — Lists all guilds the bot is in by name and ID.
 * `!channels <guild_id>` — Lists the channels in the specified guild.
-* `!say <channel_id> <message>` — Sends a message to the given channel ID.
+* `!say <channel_id> <message>` — Sends a message to the given channel ID. Optionally provide a message ID to reply to a specific message: `!say <channel_id> <message_id> <message>`.
 * `!read <channel_id>` — Reads the last 100 messages from the channel and
   prints them back in chunks.
-* `!reply <message_id> <response>` — Replies to the specified message across any channel, forwarding any attachments from the invoking message.
 
 # Inviting To Your Server
 
