@@ -786,18 +786,48 @@ async function handle_message(msg) {
                 case '!say':
                         if (!isTrueAdmin(msg.author.id)) break;
                         const channelId = words[1];
-                        const sayMessage = words.slice(2).join(' ');
+                        const possibleId = words[2];
+                        const hasMessageId = /^\d{10,}$/.test(possibleId);
+                        const messageId = hasMessageId ? possibleId : null;
+                        const sayMessage = hasMessageId ? words.slice(3).join(' ') : words.slice(2).join(' ');
+                        const files = Array.from(msg.attachments.values()).map(att => ({ attachment: att.url, name: att.name }));
+                        var channelFound = false;
+                        var messageFound = false;
                         var sent = false;
                         for (const client of clients) {
                                 const channel = client.channels.cache.get(channelId);
                                 if (channel) {
-                                        channel.send(sayMessage);
-                                        sent = true;
+                                        channelFound = true;
+                                        if (messageId) {
+                                                try {
+                                                        const target = await channel.messages.fetch(messageId);
+                                                        const options = { content: sayMessage };
+                                                        if (files.length > 0) {
+                                                                options.files = files;
+                                                        }
+                                                        await target.reply(options);
+                                                        messageFound = true;
+                                                        sent = true;
+                                                } catch (err) {
+                                                        // ignore fetch errors
+                                                }
+                                        } else {
+                                                const options = { content: sayMessage };
+                                                if (files.length > 0) {
+                                                        options.files = files;
+                                                }
+                                                await channel.send(options);
+                                                sent = true;
+                                        }
                                         break;
                                 }
                         }
-                        if (!sent) {
+                        if (!channelFound) {
                                 msg.reply('Channel not found.');
+                        } else if (messageId && !messageFound) {
+                                msg.reply('Message not found.');
+                        } else if (sent) {
+                                msg.reply('Message sent.');
                         }
                         break;
                 case '!read':
@@ -829,34 +859,6 @@ async function handle_message(msg) {
                         }
                         if (!located) {
                                 msg.reply('Channel not found.');
-                        }
-                        break;
-                case '!reply':
-                        if (!isTrueAdmin(msg.author.id)) break;
-                        const targetMessageId = words[1];
-                        const replyText = words.slice(2).join(' ');
-                        var responded = false;
-                        const files = Array.from(msg.attachments.values()).map(att => ({ attachment: att.url, name: att.name }));
-                        for (const client of clients) {
-                                if (responded) break;
-                                for (const channel of client.channels.cache.values()) {
-                                        if (responded) break;
-                                        if (channel.type !== 'text' && channel.type !== 'GUILD_TEXT' && channel.type !== 'dm' && channel.type !== 'DM') continue;
-                                        try {
-                                                const target = await channel.messages.fetch(targetMessageId);
-                                                const options = { content: replyText };
-                                                if (files.length > 0) {
-                                                        options.files = files;
-                                                }
-                                                await target.reply(options);
-                                                responded = true;
-                                        } catch (err) {
-                                                // ignore fetch errors
-                                        }
-                                }
-                        }
-                        if (!responded) {
-                                msg.reply('Message not found.');
                         }
                         break;
         }
