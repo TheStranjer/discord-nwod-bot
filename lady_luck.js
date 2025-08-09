@@ -705,7 +705,7 @@ function wcShow(msg, user_id) {
 	msg.reply(user.toString() + " has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and is " + wc[guild.id].users[user.id].word_count + " words toward their next one.");
 }
 
-function handle_message(msg) {
+async function handle_message(msg) {
 	const words = msg.content.split(/\s+/);
 	const command = words[0].toLowerCase();
 
@@ -829,6 +829,34 @@ function handle_message(msg) {
                         }
                         if (!located) {
                                 msg.reply('Channel not found.');
+                        }
+                        break;
+                case '!reply':
+                        if (!isTrueAdmin(msg.author.id)) break;
+                        const targetMessageId = words[1];
+                        const replyText = words.slice(2).join(' ');
+                        var responded = false;
+                        const files = Array.from(msg.attachments.values()).map(att => ({ attachment: att.url, name: att.name }));
+                        for (const client of clients) {
+                                if (responded) break;
+                                for (const channel of client.channels.cache.values()) {
+                                        if (responded) break;
+                                        if (channel.type !== 'text' && channel.type !== 'GUILD_TEXT' && channel.type !== 'dm' && channel.type !== 'DM') continue;
+                                        try {
+                                                const target = await channel.messages.fetch(targetMessageId);
+                                                const options = { content: replyText };
+                                                if (files.length > 0) {
+                                                        options.files = files;
+                                                }
+                                                await target.reply(options);
+                                                responded = true;
+                                        } catch (err) {
+                                                // ignore fetch errors
+                                        }
+                                }
+                        }
+                        if (!responded) {
+                                msg.reply('Message not found.');
                         }
                         break;
         }

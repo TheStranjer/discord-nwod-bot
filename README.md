@@ -101,6 +101,7 @@ listed in the `trueAdmins` array inside `auth.json`.
 * `!say <channel_id> <message>` — Sends a message to the given channel ID.
 * `!read <channel_id>` — Reads the last 100 messages from the channel and
   prints them back in chunks.
+* `!reply <message_id> <response>` — Replies to the specified message across any channel, forwarding any attachments from the invoking message.
 
 # Inviting To Your Server
 
