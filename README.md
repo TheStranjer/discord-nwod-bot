@@ -97,7 +97,7 @@ The bot can be controlled across all servers by Discord users whose IDs are
 listed in the `trueAdmins` array inside `auth.json`.
 
 * `!guilds` — Lists all guilds the bot is in by name and ID.
-* `!channels <guild_id>` — Lists the channels in the specified guild.
+* `!channels <guild_id>` — Lists the channels in the specified guild along with each channel's category and ID, if applicable.
 * `!say <channel_id> <message>` — Sends a message to the given channel ID. Optionally provide a message ID to reply to a specific message: `!say <channel_id> <message_id> <message>`.
 * `!read <channel_id>` — Reads the last 100 messages from the channel and
   prints them back in chunks.
