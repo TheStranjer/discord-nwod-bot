@@ -773,7 +773,9 @@ async function handle_message(msg) {
                                         guildFound = true;
                                         var channelNames = [];
                                         guild.channels.cache.filter(ch => ch.type === 'text' || ch.type === 'GUILD_TEXT').forEach(ch => {
-                                                channelNames.push(`${ch.name} (${ch.id})`);
+                                                const category = ch.parent;
+                                                const categoryInfo = category ? ` - ${category.name} (${category.id})` : '';
+                                                channelNames.push(`${ch.name} (${ch.id})${categoryInfo}`);
                                         });
                                         sendLongMessage(msg.channel, channelNames.join('\n') || 'No channels.');
                                         break;
