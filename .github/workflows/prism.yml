@@ -1,0 +1,28 @@
+name: Auto-translate i18n
+
+on:
+  push:
+    paths:
+      - "locales/en.json"
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prism Auto-Translate
+        uses: TheStranjer/prism@master
+        with:
+          source_file: "locales/en.json"
+          target_languages: "es,fr,de,pt,it,ja,zh,ko,ru"
+          author_name: ${{ secrets.AUTHOR_NAME }}
+          author_email: ${{ secrets.AUTHOR_EMAIL }}
+          api_token: ${{ secrets.OPENAI_TRANSLATE_KEY }}
+          github_token: ${{ secrets.PAT }}
+          delivery_method: "push"
+          llm_commit_messages: true
