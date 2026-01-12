@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "Lady Luck",
+    "startup_description": "A Discord dicebot with rules ad hoceries",
+    "startup_author": "The Stranjer\n\n",
+    "d10_refill_start": "d10s have {count} left. Refilling...",
+    "d10_refill_done": "d10s now at {count}.",
+    "logged_in": " logged in as {tag}!",
+    "roll_nwod": "New nWoD dice roll from {user}. Outcome: {outcome}",
+    "roll_dav20": "New dav20 roll from {user}. Outcome: {outcome}",
+    "logging_in": "Logging in now...",
+    "stored_results_update": "Updating stored results"
+  },
+  "dav20": {
+    "error_prefix": "Fate cannot adjudicate your request because: ",
+    "errors": {
+      "pool_range": "Pool must be a number between 1 and 25",
+      "difficulty_range": "Must assign a difficulty between 1 and 10"
+    },
+    "outcome": {
+      "multi_success": "{count} Successes!",
+      "single_success": "Single successes!",
+      "botch": "Botch!",
+      "failure": "Failure..."
+    },
+    "notes": {
+      "no_botches": "No Botches",
+      "willpower": "Using willpower",
+      "specialty": "Using Specialty"
+    },
+    "options_none": "None",
+    "text": "**Outcome:** {outcome}\n**Pool:** {pool}\n**Difficulty:** {difficulty}\n**Results:** {results}\n**Options:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "Fate cannot adjuciate your request because: ",
+    "errors": {
+      "pool_nan": "Pool must be a number",
+      "again_nan": "Exploding dice value must be a number",
+      "again_low": "Exploding dice may not be below 8",
+      "pool_high": "Cannot roll more than 25 dice"
+    },
+    "chance_roll": "Rolling a chance die with {successes}. _Individual results:_ {results}",
+    "notes": {
+      "again": "{again}-Again",
+      "botch": "Ones Botch",
+      "rote": "Rote Action",
+      "no_rerolls": "No Rerolls"
+    },
+    "roll": "Rolling {pool}{notes}; {successes}. _Individual results:_ {results}",
+    "successes": "{count} success{suffix}",
+    "no_success": "No success",
+    "again_suffix": " ({again}-Again)",
+    "no_rerolls": " (No rerolls)"
+  },
+  "initiative": {
+    "table_header": "**Initiative Table**\n\n```\n",
+    "table_footer": "```",
+    "forced_by": " (forced by {name})",
+    "force_error": "Can only force the init table if given a number",
+    "roll": "Rolling initiative for {name}: {roll} (roll outcome) + {offset} = {total}",
+    "cleared": "Cleared initiative table"
+  },
+  "wordcount": {
+    "guild_only": "This command must be used in a guild.",
+    "guild_only_lower": "this command must be used in a guild.",
+    "admin_only": "Only administrators may use this command.",
+    "admin_only_lower": "only administrators may use this command.",
+    "channel_missing": "Channel does not exist on this server",
+    "channel_missing_lower": "channel does not exist on this server",
+    "channel_removed": "The channel {name} has been removed.",
+    "channel_not_listed": "The channel {name} isn't in the wordcount list",
+    "channel_already_added": "That channel is already added.",
+    "channel_added": "Added {name}",
+    "no_wordcount_channels": "This server has no wordcount channels.",
+    "list_header": "The wordcount channels are:\n\n",
+    "ooc_set": "OOC award channel set to {name}",
+    "role_missing": "role does not exist on this server",
+    "role_already_added": "That role is already added.",
+    "role_added": "Added {name}",
+    "role_removed": "Removed role {name}.",
+    "force_user_missing": "You must specify the user whose total you are forcing.",
+    "force_bp_invalid": "Must submit a bonus point total, and it must be a number",
+    "user_missing": "that user isn't on this server.",
+    "force_confirm": "{user} now has {points} Bonus Points and a word count cache of {count}.",
+    "status": "{user} has {points} Bonus Points and is {count} words toward their next one.",
+    "ooc_award": "{user} wrote a post with {words} words, earning {reward} Bonus Points. This user's total is now {total}."
+  },
+  "admin_tools": {
+    "no_guilds": "No guilds.",
+    "no_channels": "No channels.",
+    "guild_not_found": "Guild not found.",
+    "channel_not_found": "Channel not found.",
+    "message_not_found": "Message not found.",
+    "message_sent": "Message sent."
+  }
+}

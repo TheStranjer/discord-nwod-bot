@@ -2,9 +2,31 @@ const fs = require('fs');
 const RandomOrg = require('random-org');
 const { Client, Intents } = require('discord.js');
 
-console.log("Lady Luck");
-console.log("A Discord dicebot with rules ad hoceries");
-console.log("The Stranjer\n\n");
+const locales = JSON.parse(fs.readFileSync('locales/en.json', 'utf8'));
+
+function t(key, vars) {
+	const parts = key.split('.');
+	let value = locales;
+	for (const part of parts) {
+		if (!value || !Object.prototype.hasOwnProperty.call(value, part)) {
+			return key;
+		}
+		value = value[part];
+	}
+	if (typeof value !== 'string') {
+		return key;
+	}
+	if (!vars) {
+		return value;
+	}
+	return value.replace(/\{(\w+)\}/g, function (match, name) {
+		return vars[name] == null ? match : String(vars[name]);
+	});
+}
+
+console.log(t('console.startup_title'));
+console.log(t('console.startup_description'));
+console.log(t('console.startup_author'));
 
 var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
 var wc = JSON.parse(fs.readFileSync('wc.json', 'utf8'));
@@ -41,10 +63,10 @@ function unique(value, index, self) {
 
 function d10RefillCheck() {
 	if (d10s.length < 100) {
-		console.log(`d10s have ${d10s.length} left. Refilling...`);
+		console.log(t('console.d10_refill_start', { count: d10s.length }));
 		random.generateIntegers({ min: 1, max: 10, n: 100 }).then(function (result) {
 			d10s = d10s.concat(result.random.data);
-			console.log(`d10s now at ${d10s.length}.`);
+			console.log(t('console.d10_refill_done', { count: d10s.length }));
 		});
 	}
 }
@@ -63,11 +85,11 @@ function dav20Roll(pool, difficulty, options) {
 	};
 
 	if (isNaN(outcome.pool) || outcome.pool > 25 || outcome.pool < 1) {
-		outcome.errors.push("Pool must be a number between 1 and 25");
+		outcome.errors.push(t('dav20.errors.pool_range'));
 	}
 
 	if (isNaN(outcome.difficulty) || outcome.difficulty > 10 || outcome.difficulty < 1) {
-		outcome.errors.push("Must assign a difficulty between 1 and 10");
+		outcome.errors.push(t('dav20.errors.difficulty_range'));
 	}
 
 	for (var i = 0; i < pool; i++) {
@@ -121,17 +143,17 @@ function nwodRoll(pool, options='') {
 	};
 
 	if (isNaN(outcome.pool)) {
-		outcome.errors.push("Pool must be a number");
+		outcome.errors.push(t('nwod.errors.pool_nan'));
 	}
 
 	if (isNaN(outcome.again)) {
-		outcome.errors.push("Exploding dice value must be a number")
+		outcome.errors.push(t('nwod.errors.again_nan'))
 	} else if (outcome.again < 8) {
-		outcome.errors.push("Exploding dice may not be below 8");
+		outcome.errors.push(t('nwod.errors.again_low'));
 	}
 	
 	if (outcome.pool > 25) {
-		outcome.errors.push("Cannot roll more than 25 dice");
+		outcome.errors.push(t('nwod.errors.pool_high'));
 	}
 
 	if (outcome.errors.length) {
@@ -177,19 +199,19 @@ function nwodRoll(pool, options='') {
 
 function suxxToWords(suxx) {
 	return suxx
-	  ? suxx + " success" + (suxx == 1 ? '' : 'es')
-	  : 'No success';
+	  ? t('nwod.successes', { count: suxx, suffix: suxx == 1 ? '' : 'es' })
+	  : t('nwod.no_success');
 }
 
 function againToWords(again) {
 	return again == 10
 	  ? ''
-	  : (again < 10 ? " (" + again + "-Again)" : " (No rerolls)");
+	  : (again < 10 ? t('nwod.again_suffix', { again: again }) : t('nwod.no_rerolls'));
 }
 
 function dav20ToText(outcome) {
 	if (outcome.errors.length > 0) {
-		return "Fate cannot adjudicate your request because: " + outcome.errors.join("; ");
+		return t('dav20.error_prefix') + outcome.errors.join("; ");
 	}
 
 	const prettyResults = outcome.results.map(function (res) {
@@ -206,37 +228,46 @@ function dav20ToText(outcome) {
 
 	var outcomeType = '';
 	if (outcome.successes > 1) {
-		outcomeType = `${outcome.successes} Successes!`;
+		outcomeType = t('dav20.outcome.multi_success', { count: outcome.successes });
 	} else if (outcome.successes == 1) {
-		outcomeType = `Single successes!`;
+		outcomeType = t('dav20.outcome.single_success');
 	} else if (outcome.botches > 0 && outcome.hits == 0) {
-		outcomeType = 'Botch!';
+		outcomeType = t('dav20.outcome.botch');
 	} else {
-		outcomeType = 'Failure...';
+		outcomeType = t('dav20.outcome.failure');
 	}
 
 	notes = [];
 
 	if (!outcome.botching) {
-		notes.push("No Botches");
+		notes.push(t('dav20.notes.no_botches'));
 	}
 
 	if (outcome.willpower) {
-		notes.push("Using willpower");
+		notes.push(t('dav20.notes.willpower'));
 	}
 
 	if (outcome.specialty) {
-		notes.push("Using Specialty");
+		notes.push(t('dav20.notes.specialty'));
 	}
 
-	return `**Outcome:** ${outcomeType}\n**Pool:** ${outcome.pool}\n**Difficulty:** ${outcome.difficulty}\n**Results:** ${prettyResults.join(', ')}\n**Options:** ${notes.length > 0 ? notes.join(', ') : 'None'}`;
+	return t('dav20.text', {
+		outcome: outcomeType,
+		pool: outcome.pool,
+		difficulty: outcome.difficulty,
+		results: prettyResults.join(', '),
+		options: notes.length > 0 ? notes.join(', ') : t('dav20.options_none')
+	});
 }
 
 function nwodToText(outcome) {
 	if (outcome.errors.length > 0) {
-		return "Fate cannot adjuciate your request because: " + outcome.errors.join("; ");
+		return t('nwod.error_prefix') + outcome.errors.join("; ");
 	} else if (outcome.pool < 1) {
-		return `Rolling a chance die with ${suxxToWords(outcome.successes)}. _Individual results:_ ${outcome.results.join(', ')}`;
+		return t('nwod.chance_roll', {
+			successes: suxxToWords(outcome.successes),
+			results: outcome.results.join(', ')
+		});
 	}
 
 	var newResults = outcome.results;
@@ -253,23 +284,28 @@ function nwodToText(outcome) {
 	
 	notes = [];
 	if (outcome.again == 8 || outcome.again == 9) {
-		notes.push(outcome.again + "-Again");
+		notes.push(t('nwod.notes.again', { again: outcome.again }));
 	}
 	if (outcome.botching) {
-		notes.push("Ones Botch");
+		notes.push(t('nwod.notes.botch'));
 	}
 	if (outcome.rote) {
-		notes.push("Rote Action");
+		notes.push(t('nwod.notes.rote'));
 	}
 	if (outcome.again == 11) {
-		notes.push("No Rerolls");
+		notes.push(t('nwod.notes.no_rerolls'));
 	}
 
-	return `Rolling ${outcome.pool}${notes.length > 0 ? ' (' + notes.join(", ") + ')' : ''}; ${suxxToWords(outcome.successes)}. _Individual results:_ ${newResults.join(', ')}`;
+	return t('nwod.roll', {
+		pool: outcome.pool,
+		notes: notes.length > 0 ? ' (' + notes.join(", ") + ')' : '',
+		successes: suxxToWords(outcome.successes),
+		results: newResults.join(', ')
+	});
 }
 
 function generateTableContent(initTable) {
-	var ret = "**Initiative Table**\n\n```\n";
+	var ret = t('initiative.table_header');
 
 	var chars = initTable.characters;
 
@@ -280,18 +316,18 @@ function generateTableContent(initTable) {
 
 	for (const charIndex in keys) {
 		charName = keys[charIndex];
-		var forcesText = (initTable.forces[charName] ? " (forced by " + initTable.forces[charName] + ")" : "");
+		var forcesText = (initTable.forces[charName] ? t('initiative.forced_by', { name: initTable.forces[charName] }) : "");
 		ret += chars[charName].toString().padStart(padLength) + " : " + charName + forcesText + "\n";
 	}
 
-	ret += "```";
+	ret += t('initiative.table_footer');
 
 	return ret;
 }
 
 function nwodInitForceToText(msg, val, name) {
 	if (!/^\d+$/.test(val)) {
-		msg.reply("Can only force the init table if given a number");
+		msg.reply(t('initiative.force_error'));
 		return;
 	}
 
@@ -332,7 +368,7 @@ function nwodInitToText(msg, offset, name) {
 
 	var roll = d10();
 	var channelId = msg["channel"].id;
-	var content = `Rolling initiative for ${name}: ${roll} (roll outcome) + ${offset} = ${roll + offset}`;
+	var content = t('initiative.roll', { name: name, roll: roll, offset: offset, total: roll + offset });
 	msg.reply(content).then(function (notificationMsg) {
 		if (!initTables[channelId]) {
 			initTables[channelId] = { characters: {}, forces: {} };
@@ -353,31 +389,31 @@ function nwodInitToText(msg, offset, name) {
 
 function nwodInitClear(msg) {
 	var channelId = msg["channel"].id;
-	msg.reply("Cleared initiative table");
+	msg.reply(t('initiative.cleared'));
 	initTables[channelId] = { characters: {}, forces: {} };
 }
 
 function on_ready(client) {
-	console.log(` logged in as ${this.user.tag}!`);
+	console.log(t('console.logged_in', { tag: this.user.tag }));
 }
 
 
 function wcRem(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("This command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("Only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only'));
 		return;
 	}
 
 	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("Channel does not exist on this server");
+		msg.reply(t('wordcount.channel_missing'));
 		return;
 	}
 
@@ -389,23 +425,23 @@ function wcRem(msg, channel_id) {
 		wc[guild.id].listen_channels = wc[guild.id].listen_channels.filter(function (val, ind) {
 			return val != channel_id;
 		});
-		msg.reply("The channel " + channel.name + " has been removed.");
+		msg.reply(t('wordcount.channel_removed', { name: channel.name }));
 
 		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 	} else {
-		msg.reply("The channel " + channel.name + " isn't in the wordcount list");
+		msg.reply(t('wordcount.channel_not_listed', { name: channel.name }));
 	}
 }
 
 function wcAdd(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -416,15 +452,15 @@ function wcAdd(msg, channel_id) {
 	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("channel does not exist on this server");
+		msg.reply(t('wordcount.channel_missing_lower'));
 		return;
 	}
 
 	if (wc[guild.id].listen_channels.includes(channel_id)) {
-		msg.reply("That channel is already added.");
+		msg.reply(t('wordcount.channel_already_added'));
 	} else {
 		wc[guild.id].listen_channels.push(channel_id);
-		msg.reply("Added " + channel.name);
+		msg.reply(t('wordcount.channel_added', { name: channel.name }));
 		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 	}
 }
@@ -432,12 +468,12 @@ function wcAdd(msg, channel_id) {
 function wcList(msg) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("This command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("Only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only'));
 		return;
 	}
 
@@ -448,11 +484,11 @@ function wcList(msg) {
 	var channels = guild.channels.cache.filter(chan => wc[guild.id].listen_channels.includes(chan.id)).array();
 
 	if (channels.length == 0) {
-		msg.reply("This server has no wordcount channels.");
+		msg.reply(t('wordcount.no_wordcount_channels'));
 		return;
 	}
 
-	var reply = "The wordcount channels are:\n\n";
+	var reply = t('wordcount.list_header');
 
 	for (i = 0; i < channels.length; i++) {
 		reply += channels[i].name + "\n";
@@ -464,12 +500,12 @@ function wcList(msg) {
 function wcOOC(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -480,13 +516,13 @@ function wcOOC(msg, channel_id) {
 	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply("channel does not exist on this server");
+		msg.reply(t('wordcount.channel_missing_lower'));
 		return;
 	}
 
 	wc[guild.id].ooc_channel = channel.id;
 
-	msg.reply("OOC award channel set to " + channel.name);
+	msg.reply(t('wordcount.ooc_set', { name: channel.name }));
 }
 
 function wordCount(prose) {
@@ -498,12 +534,12 @@ function wordCount(prose) {
 function wcRA(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -513,7 +549,7 @@ function wcRA(msg, role_id) {
 	
 	guild.roles.fetch(role_id).then(role => {
 		if (role == null) {
-			msg.reply("role does not exist on this server");
+			msg.reply(t('wordcount.role_missing'));
 			return;
 		}
 	
@@ -522,10 +558,10 @@ function wcRA(msg, role_id) {
 		}
 	
 		if (wc[guild.id].roles.includes(role_id)) {
-			msg.reply("That role is already added.");
+			msg.reply(t('wordcount.role_already_added'));
 		} else {
 			wc[guild.id].roles.push(role_id);
-			msg.reply("Added " + role.name);
+			msg.reply(t('wordcount.role_added', { name: role.name }));
 			fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 		}
 	});
@@ -534,12 +570,12 @@ function wcRA(msg, role_id) {
 function wcRR(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -550,7 +586,7 @@ function wcRR(msg, role_id) {
 	guild.roles.fetch(role_id).then(role => {
 		wc[guild.id].roles = wc[guild.id].roles.filter(function (val, ind) { return val != role_id });
 
-		msg.reply("Removed role " + (role ? role.name : role_id) + ".");
+		msg.reply(t('wordcount.role_removed', { name: role ? role.name : role_id }));
 
 		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 	});
@@ -609,7 +645,12 @@ function wordCountConsider(msg) {
 	var now = Math.floor(Date.now() / 1000);
 
 	if (reward > 0 && now > wc[guild.id].users[msg.author.id].last_sent) {
-		ooc_channel.send(msg.author.toString() + " wrote a post with " + wordCountCalc + " words, earning " + reward + " Bonus Points. This user's total is now " + wc[guild.id].users[msg.author.id].bonus_points + ".");
+		ooc_channel.send(t('wordcount.ooc_award', {
+			user: msg.author.toString(),
+			words: wordCountCalc,
+			reward: reward,
+			total: wc[guild.id].users[msg.author.id].bonus_points
+		}));
 		wc[guild.id].users[msg.author.id].last_sent = now + 3600;
 	}
 	
@@ -618,30 +659,30 @@ function wordCountConsider(msg) {
 
 function wcForce(msg, user_id, bp_total, wc_total) {
 	if (user_id == null || isNaN(user_id)) {
-		msg.reply("You must specify the user whose total you are forcing.");
+		msg.reply(t('wordcount.force_user_missing'));
 		return;
 	}
 
 	if (bp_total == null || isNaN(bp_total) ) {
-		msg.reply("Must submit a bonus point total, and it must be a number");
+		msg.reply(t('wordcount.force_bp_invalid'));
 		return;
 	}
 
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply("only administrators may use this command.");
+		msg.reply(t('wordcount.admin_only_lower'));
 		return;
 	}
 
 	var user = guild.members.cache.array().filter(member => member.user.id == user_id)[0];
 
 	if (user == null) {
-		msg.reply("that user isn't on this server.");
+		msg.reply(t('wordcount.user_missing'));
 		return;
 	}
 
@@ -662,7 +703,11 @@ function wcForce(msg, user_id, bp_total, wc_total) {
 		wc[guild.id].users[user.id].word_count = parseInt(wc_total);
 	}
 
-	msg.reply(user.toString() + " now has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and a word count cache of " + wc[guild.id].users[user.id].word_count + ".")
+	msg.reply(t('wordcount.force_confirm', {
+		user: user.toString(),
+		points: wc[guild.id].users[user.id].bonus_points,
+		count: wc[guild.id].users[user.id].word_count
+	}))
 
 	fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 }
@@ -670,7 +715,7 @@ function wcForce(msg, user_id, bp_total, wc_total) {
 function wcShow(msg, user_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply("this command must be used in a guild.");
+		msg.reply(t('wordcount.guild_only_lower'));
 		return;
 	}
 
@@ -702,7 +747,11 @@ function wcShow(msg, user_id) {
 		word_count = "no";
 	}
 
-	msg.reply(user.toString() + " has " + wc[guild.id].users[user.id].bonus_points + " Bonus Points and is " + wc[guild.id].users[user.id].word_count + " words toward their next one.");
+	msg.reply(t('wordcount.status', {
+		user: user.toString(),
+		points: wc[guild.id].users[user.id].bonus_points,
+		count: wc[guild.id].users[user.id].word_count
+	}));
 }
 
 async function handle_message(msg) {
@@ -712,12 +761,18 @@ async function handle_message(msg) {
 	switch (command) {
 		case '!nwod':
 			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2]));
-			console.log(`New nWoD dice roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${nWoDoutcome}`);
+			console.log(t('console.roll_nwod', {
+				user: `${msg.author.username}#${msg.author.discriminator}`,
+				outcome: nWoDoutcome
+			}));
 			msg.reply(nWoDoutcome);
 			break;
 		case '!dav20':
 			const dav20outcome = dav20ToText(dav20Roll(words[1], words[2], words[3]));
-			console.log(`New dav20 roll from ${msg.author.username}#${msg.author.discriminator}. Outcome: ${dav20outcome}`);
+			console.log(t('console.roll_dav20', {
+				user: `${msg.author.username}#${msg.author.discriminator}`,
+				outcome: dav20outcome
+			}));
 			msg.reply(dav20outcome);
 			break;
 		case '!init':
@@ -761,7 +816,7 @@ async function handle_message(msg) {
                                         guildNames.push(`${guild.name} (${guild.id})`);
                                 });
                         }
-                        sendLongMessage(msg.channel, guildNames.join('\n') || 'No guilds.');
+                        sendLongMessage(msg.channel, guildNames.join('\n') || t('admin_tools.no_guilds'));
                         break;
                 case '!channels':
                         if (!isTrueAdmin(msg.author.id)) break;
@@ -777,12 +832,12 @@ async function handle_message(msg) {
                                                 const categoryInfo = category ? ` - ${category.name} (${category.id})` : '';
                                                 channelNames.push(`${ch.name} (${ch.id})${categoryInfo}`);
                                         });
-                                        sendLongMessage(msg.channel, channelNames.join('\n') || 'No channels.');
+                                        sendLongMessage(msg.channel, channelNames.join('\n') || t('admin_tools.no_channels'));
                                         break;
                                 }
                         }
                         if (!guildFound) {
-                                msg.reply('Guild not found.');
+                                msg.reply(t('admin_tools.guild_not_found'));
                         }
                         break;
                 case '!say':
@@ -825,11 +880,11 @@ async function handle_message(msg) {
                                 }
                         }
                         if (!channelFound) {
-                                msg.reply('Channel not found.');
+                                msg.reply(t('admin_tools.channel_not_found'));
                         } else if (messageId && !messageFound) {
-                                msg.reply('Message not found.');
+                                msg.reply(t('admin_tools.message_not_found'));
                         } else if (sent) {
-                                msg.reply('Message sent.');
+                                msg.reply(t('admin_tools.message_sent'));
                         }
                         break;
                 case '!read':
@@ -860,7 +915,7 @@ async function handle_message(msg) {
                                 }
                         }
                         if (!located) {
-                                msg.reply('Channel not found.');
+                                msg.reply(t('admin_tools.channel_not_found'));
                         }
                         break;
         }
@@ -871,7 +926,7 @@ async function handle_message(msg) {
 for (const token of auth.token) {
         const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
         clients.push(client);
-        process.stdout.write("Logging in now...");
+        process.stdout.write(t('console.logging_in'));
         client.on('message', handle_message);
         client.on('ready', on_ready);
         client.login(token);
@@ -892,5 +947,5 @@ setInterval(function () {
 
 	d10sold = d10s;
 
-	console.log("Updating stored results");
+	console.log(t('console.stored_results_update'));
 }, minute);
