@@ -80,7 +80,7 @@
     "role_removed": "Rôle {name} supprimé.",
     "force_user_missing": "Vous devez spécifier l'utilisateur dont vous forcez le total.",
     "force_bp_invalid": "Vous devez soumettre un total de points bonus, et cela doit être un nombre",
-    "user_missing": "cet utilisateur n'est pas sur ce serveur.",
+    "user_missing": "Cet utilisateur n'est pas sur ce serveur.",
     "force_confirm": "{user} a maintenant {points} points bonus et un cache du décompte de mots de {count}.",
     "status": "{user} a {points} points bonus et il manque {count} mots pour atteindre le suivant.",
     "ooc_award": "{user} a écrit un message de {words} mots, gagnant {reward} points bonus. Le total de cet utilisateur est maintenant {total}."

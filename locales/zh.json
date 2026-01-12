@@ -80,7 +80,7 @@
     "role_removed": "已删除角色 {name}。",
     "force_user_missing": "您必须指定您正在强制其总计的用户。",
     "force_bp_invalid": "必须提交一个加分总数，并且它必须是一个数字",
-    "user_missing": "该用户不在此服务器。",
+    "user_missing": "该用户不在此服务器上。",
     "force_confirm": "{user}现在有{points}奖励积分，字数缓存为{count}。",
     "status": "{user} 有 {points} 奖励积分，还差 {count} 个词就能获得下一个。",
     "ooc_award": "{user} 发布了一篇包含 {words} 个字的帖子，获得了 {reward} 奖励积分。该用户的总积分现在为 {total}。"

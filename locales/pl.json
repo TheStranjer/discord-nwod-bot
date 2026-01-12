@@ -1,0 +1,104 @@
+{
+  "wordcount": {
+    "user_missing": "Ten użytkownik nie jest na tym serwerze.",
+    "guild_only": "Ta komenda musi być użyta na serwerze.",
+    "guild_only_lower": "Ta komenda musi być użyta na serwerze.",
+    "admin_only": "Tylko administratorzy mogą używać tej polecenia.",
+    "admin_only_lower": "Tylko administratorzy mogą używać tej komendy.",
+    "channel_missing": "Kanał nie istnieje na tym serwerze",
+    "channel_missing_lower": "kanał nie istnieje na tym serwerze",
+    "channel_removed": "Kanał {name} został usunięty.",
+    "channel_not_listed": "Kanał {name} nie znajduje się na liście zliczania słów",
+    "channel_already_added": "Ten kanał został już dodany.",
+    "channel_added": "Dodano {name}",
+    "no_wordcount_channels": "Na tym serwerze nie ma kanałów do liczenia słów.",
+    "list_header": "Kanały zliczania słów to:",
+    "ooc_set": "Ustawiono kanał nagród OOC na {name}.",
+    "role_missing": "Rola nie istnieje na tym serwerze",
+    "role_already_added": "Ta rola została już dodana.",
+    "role_added": "Dodano {name}",
+    "role_removed": "Usunięto rolę {name}.",
+    "force_user_missing": "Musisz określić użytkownika, którego łączną wartość wymuszasz.",
+    "force_bp_invalid": "Należy podać łączną liczbę punktów bonusowych; wartość ta musi być liczbą.",
+    "force_confirm": "{user} ma teraz {points} punktów bonusowych i pamięć podręczną liczby słów równą {count}.",
+    "status": "{user} ma {points} punktów bonusowych i potrzebuje jeszcze {count} słów do kolejnego.",
+    "ooc_award": "Post napisany przez {user} zawierał {words} słów, co przyniosło {reward} Punktów Bonusowych. Łączna liczba punktów tego użytkownika wynosi teraz {total}."
+  },
+  "console": {
+    "startup_title": "Pani Fortuna",
+    "startup_description": "Discordowy bot do rzutów kośćmi z zasadami ad hoc",
+    "startup_author": "Nieznajomy",
+    "d10_refill_start": "Pozostało {count} d10. Uzupełnianie...",
+    "d10_refill_done": "d10s ma teraz {count}.",
+    "logged_in": "Zalogowano jako {tag}!",
+    "roll_nwod": "Nowy rzut kośćmi nWoD od {user}. Wynik: {outcome}",
+    "roll_dav20": "Nowy rzut dav20 od {user}. Wynik: {outcome}",
+    "logging_in": "Loguję się teraz...",
+    "stored_results_update": "Aktualizowanie zapisanych wyników"
+  },
+  "dav20": {
+    "error_prefix": "Los nie może rozstrzygnąć twojej prośby, ponieważ: ",
+    "errors": {
+      "pool_range": "Pool musi być liczbą między 1 a 25.",
+      "difficulty_range": "Należy przypisać poziom trudności od 1 do 10."
+    },
+    "outcome": {
+      "multi_success": "{count} sukcesów!",
+      "single_success": "Pojedyncze sukcesy!",
+      "botch": "Fuszerka!",
+      "failure": "Niepowodzenie..."
+    },
+    "notes": {
+      "no_botches": "Brak wpadek",
+      "willpower": "Korzystanie z siły woli",
+      "specialty": "Korzystanie ze specjalizacji"
+    },
+    "options_none": "Brak",
+    "text": "**Wynik:** {outcome}\n**Pula:** {pool}\n**Trudność:** {difficulty}\n**Wyniki:** {results}\n**Opcje:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "Przeznaczenie nie może rozstrzygnąć Twojej prośby, ponieważ: ",
+    "errors": {
+      "pool_nan": "Pula musi być liczbą",
+      "again_nan": "Wartość eksplodujących kości musi być liczbą.",
+      "again_low": "Wartość kostek eksplodujących nie może być niższa niż 8.",
+      "pool_high": "Nie można rzucić więcej niż 25 kostek."
+    },
+    "chance_roll": "Rzut kostką szansy z {successes}. _Pojedyncze wyniki:_ {results}",
+    "notes": {
+      "again": "{again}-Jeszcze raz",
+      "botch": "Fuszerka Jedynek",
+      "rote": "rutynowe działanie",
+      "no_rerolls": "Brak przerzutów"
+    },
+    "roll": "Rzucanie {pool}{notes}; {successes}. _Poszczególne wyniki:_ {results}",
+    "successes": "{count} sukces{suffix}",
+    "no_success": "Nie udało się",
+    "again_suffix": " ({again}-Ponownie)",
+    "no_rerolls": " (Brak przerzutów)"
+  },
+  "initiative": {
+    "table_header": "**Tabela inicjatyw**\n\n```",
+    "table_footer": "```",
+    "forced_by": " (wymuszone przez {name})",
+    "force_error": "Tabelę init można wymusić tylko wtedy, gdy podano liczbę.",
+    "roll": "Rzut inicjatywy dla {name}: {roll} (wynik rzutu) + {offset} = {total}",
+    "cleared": "Wyczyszczono tabelę inicjatywy"
+  },
+  "admin_tools": {
+    "no_guilds": "Brak gildii.",
+    "no_channels": "Brak kanałów.",
+    "guild_not_found": "Nie znaleziono gildii.",
+    "channel_not_found": "Kanał nie znaleziony.",
+    "message_not_found": "Nie znaleziono wiadomości.",
+    "message_sent": "Wiadomość wysłana."
+  },
+  "locales": {
+    "guild_only": "Ta komenda musi być użyta na serwerze.",
+    "admin_only": "Tylko administratorzy lub właściciel serwera mogą ustawić język serwera.",
+    "missing_locale": "Proszę podać kod lokalizacji.",
+    "unknown_locale": "Ta lokalizacja nie jest dostępna. Dostępne: {locales}",
+    "server_set": "Język serwera ustawiony na {locale}.",
+    "user_set": "Twój język został ustawiony na {locale}."
+  }
+}

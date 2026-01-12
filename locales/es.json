@@ -80,7 +80,7 @@
     "role_removed": "Se eliminó el rol {name}.",
     "force_user_missing": "Debe especificar al usuario cuyo total está forzando.",
     "force_bp_invalid": "Debe enviar un total de puntos de bonificación, y debe ser un número",
-    "user_missing": "ese usuario no está en este servidor.",
+    "user_missing": "Ese usuario no está en este servidor.",
     "force_confirm": "{user} ahora tiene {points} puntos de bonificación y una caché del recuento de palabras de {count}.",
     "status": "{user} tiene {points} puntos de bonificación y le faltan {count} palabras para el siguiente.",
     "ooc_award": "{user} escribió una publicación de {words} palabras, ganando {reward} puntos de bonificación. El total de este usuario ahora es {total}."
