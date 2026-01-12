@@ -19,7 +19,7 @@ jobs:
         uses: TheStranjer/prism@master
         with:
           source_file: "locales/en.json"
-          target_languages: "es,fr,de,pt,it,ja,zh,ko,ru"
+          target_languages: "es,fr,de,pt,it,ja,zh,ko,ru,pl"
           author_name: ${{ secrets.AUTHOR_NAME }}
           author_email: ${{ secrets.AUTHOR_EMAIL }}
           api_token: ${{ secrets.OPENAI_TRANSLATE_KEY }}

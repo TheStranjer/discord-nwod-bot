@@ -80,7 +80,7 @@
     "role_removed": "Removed role {name}.",
     "force_user_missing": "You must specify the user whose total you are forcing.",
     "force_bp_invalid": "Must submit a bonus point total, and it must be a number",
-    "user_missing": "that user isn't on this server.",
+    "user_missing": "That user isn't on this server.",
     "force_confirm": "{user} now has {points} Bonus Points and a word count cache of {count}.",
     "status": "{user} has {points} Bonus Points and is {count} words toward their next one.",
     "ooc_award": "{user} wrote a post with {words} words, earning {reward} Bonus Points. This user's total is now {total}."
