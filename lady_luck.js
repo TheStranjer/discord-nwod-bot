@@ -1,17 +1,153 @@
 const fs = require('fs');
+const path = require('path');
 const RandomOrg = require('random-org');
 const { Client, Intents } = require('discord.js');
 
-const locales = JSON.parse(fs.readFileSync('locales/en.json', 'utf8'));
+const localeConfigPath = 'locales.json';
+const defaultLocaleConfig = {
+	default_locale: 'en',
+	server_locales: {},
+	user_locales: {}
+};
 
-function t(key, vars) {
+function normalizeLocaleMap(localeMap) {
+	if (!localeMap || typeof localeMap !== 'object') {
+		return {};
+	}
+	const normalized = {};
+	for (const [key, value] of Object.entries(localeMap)) {
+		if (typeof value === 'string' && value.trim() !== '') {
+			normalized[key] = value.toLowerCase();
+		}
+	}
+	return normalized;
+}
+
+function normalizeLocaleConfig(config) {
+	const normalized = {
+		default_locale: 'en',
+		server_locales: {},
+		user_locales: {}
+	};
+	if (!config || typeof config !== 'object') {
+		return normalized;
+	}
+	if (typeof config.default_locale === 'string' && config.default_locale.trim() !== '') {
+		normalized.default_locale = config.default_locale.toLowerCase();
+	}
+	normalized.server_locales = normalizeLocaleMap(config.server_locales);
+	normalized.user_locales = normalizeLocaleMap(config.user_locales);
+	return normalized;
+}
+
+let localeConfig = defaultLocaleConfig;
+function loadLocaleConfig() {
+	let parsed = null;
+	if (fs.existsSync(localeConfigPath)) {
+		try {
+			const raw = fs.readFileSync(localeConfigPath, 'utf8');
+			if (raw && raw.trim().length > 0) {
+				parsed = JSON.parse(raw);
+			}
+		} catch (err) {
+			parsed = null;
+		}
+	}
+	const normalized = normalizeLocaleConfig(parsed);
+	localeConfig = normalized;
+	if (!fs.existsSync(localeConfigPath) || parsed == null) {
+		fs.writeFileSync(localeConfigPath, JSON.stringify(localeConfig, null, 2));
+	}
+}
+
+loadLocaleConfig();
+
+const availableLocales = new Set(
+	fs.readdirSync('locales')
+		.filter(file => file.endsWith('.json'))
+		.map(file => path.basename(file, '.json'))
+);
+const localeCache = {};
+
+function loadLocale(localeKey) {
+	if (!localeKey) {
+		return null;
+	}
+	const normalized = localeKey.toLowerCase();
+	if (Object.prototype.hasOwnProperty.call(localeCache, normalized)) {
+		return localeCache[normalized];
+	}
+	const localePath = `locales/${normalized}.json`;
+	if (!fs.existsSync(localePath)) {
+		localeCache[normalized] = null;
+		return null;
+	}
+	try {
+		localeCache[normalized] = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+	} catch (err) {
+		localeCache[normalized] = null;
+	}
+	return localeCache[normalized];
+}
+
+function saveLocaleConfig() {
+	fs.writeFile(localeConfigPath, JSON.stringify(localeConfig, null, 2), function () {});
+}
+
+function uniqueList(values) {
+	const seen = new Set();
+	return values.filter(value => {
+		if (!value || seen.has(value)) {
+			return false;
+		}
+		seen.add(value);
+		return true;
+	});
+}
+
+function getDefaultLocaleChain() {
+	return uniqueList([localeConfig.default_locale, 'en']);
+}
+
+function getLocaleChainForMsg(msg) {
+	const chain = [];
+	if (msg && msg.author && localeConfig.user_locales && localeConfig.user_locales[msg.author.id]) {
+		chain.push(localeConfig.user_locales[msg.author.id]);
+	}
+	if (msg && msg.guild && localeConfig.server_locales && localeConfig.server_locales[msg.guild.id]) {
+		chain.push(localeConfig.server_locales[msg.guild.id]);
+	}
+	chain.push(localeConfig.default_locale);
+	chain.push('en');
+	return uniqueList(chain);
+}
+
+function getLocaleValue(localeData, key) {
 	const parts = key.split('.');
-	let value = locales;
+	let value = localeData;
 	for (const part of parts) {
 		if (!value || !Object.prototype.hasOwnProperty.call(value, part)) {
-			return key;
+			return null;
 		}
 		value = value[part];
+	}
+	return typeof value === 'string' ? value : null;
+}
+
+function t(key, vars, localeChain) {
+	const chain = Array.isArray(localeChain)
+		? localeChain
+		: (localeChain ? [localeChain] : getDefaultLocaleChain());
+	let value = null;
+	for (const localeKey of chain) {
+		const localeData = loadLocale(localeKey);
+		if (!localeData) {
+			continue;
+		}
+		value = getLocaleValue(localeData, key);
+		if (typeof value === 'string') {
+			break;
+		}
 	}
 	if (typeof value !== 'string') {
 		return key;
@@ -22,6 +158,10 @@ function t(key, vars) {
 	return value.replace(/\{(\w+)\}/g, function (match, name) {
 		return vars[name] == null ? match : String(vars[name]);
 	});
+}
+
+function tMsg(msg, key, vars) {
+	return t(key, vars, getLocaleChainForMsg(msg));
 }
 
 console.log(t('console.startup_title'));
@@ -71,7 +211,7 @@ function d10RefillCheck() {
 	}
 }
 
-function dav20Roll(pool, difficulty, options) {
+function dav20Roll(pool, difficulty, options, localeChain) {
 	const optionsArray = options ? options.toLowerCase().split('').filter(unique) : [];
 
 	var outcome = {
@@ -85,11 +225,11 @@ function dav20Roll(pool, difficulty, options) {
 	};
 
 	if (isNaN(outcome.pool) || outcome.pool > 25 || outcome.pool < 1) {
-		outcome.errors.push(t('dav20.errors.pool_range'));
+		outcome.errors.push(t('dav20.errors.pool_range', null, localeChain));
 	}
 
 	if (isNaN(outcome.difficulty) || outcome.difficulty > 10 || outcome.difficulty < 1) {
-		outcome.errors.push(t('dav20.errors.difficulty_range'));
+		outcome.errors.push(t('dav20.errors.difficulty_range', null, localeChain));
 	}
 
 	for (var i = 0; i < pool; i++) {
@@ -107,7 +247,7 @@ function dav20Roll(pool, difficulty, options) {
 	return outcome;
 }
 
-function nwodRoll(pool, options='') {
+function nwodRoll(pool, options='', localeChain) {
 	var again = 10;
 	var rote = false;
 	var botching = false;
@@ -143,17 +283,17 @@ function nwodRoll(pool, options='') {
 	};
 
 	if (isNaN(outcome.pool)) {
-		outcome.errors.push(t('nwod.errors.pool_nan'));
+		outcome.errors.push(t('nwod.errors.pool_nan', null, localeChain));
 	}
 
 	if (isNaN(outcome.again)) {
-		outcome.errors.push(t('nwod.errors.again_nan'))
+		outcome.errors.push(t('nwod.errors.again_nan', null, localeChain))
 	} else if (outcome.again < 8) {
-		outcome.errors.push(t('nwod.errors.again_low'));
+		outcome.errors.push(t('nwod.errors.again_low', null, localeChain));
 	}
 	
 	if (outcome.pool > 25) {
-		outcome.errors.push(t('nwod.errors.pool_high'));
+		outcome.errors.push(t('nwod.errors.pool_high', null, localeChain));
 	}
 
 	if (outcome.errors.length) {
@@ -197,21 +337,21 @@ function nwodRoll(pool, options='') {
 	return outcome;
 }
 
-function suxxToWords(suxx) {
+function suxxToWords(suxx, localeChain) {
 	return suxx
-	  ? t('nwod.successes', { count: suxx, suffix: suxx == 1 ? '' : 'es' })
-	  : t('nwod.no_success');
+	  ? t('nwod.successes', { count: suxx, suffix: suxx == 1 ? '' : 'es' }, localeChain)
+	  : t('nwod.no_success', null, localeChain);
 }
 
-function againToWords(again) {
+function againToWords(again, localeChain) {
 	return again == 10
 	  ? ''
-	  : (again < 10 ? t('nwod.again_suffix', { again: again }) : t('nwod.no_rerolls'));
+	  : (again < 10 ? t('nwod.again_suffix', { again: again }, localeChain) : t('nwod.no_rerolls', null, localeChain));
 }
 
-function dav20ToText(outcome) {
+function dav20ToText(outcome, localeChain) {
 	if (outcome.errors.length > 0) {
-		return t('dav20.error_prefix') + outcome.errors.join("; ");
+		return t('dav20.error_prefix', null, localeChain) + outcome.errors.join("; ");
 	}
 
 	const prettyResults = outcome.results.map(function (res) {
@@ -228,27 +368,27 @@ function dav20ToText(outcome) {
 
 	var outcomeType = '';
 	if (outcome.successes > 1) {
-		outcomeType = t('dav20.outcome.multi_success', { count: outcome.successes });
+		outcomeType = t('dav20.outcome.multi_success', { count: outcome.successes }, localeChain);
 	} else if (outcome.successes == 1) {
-		outcomeType = t('dav20.outcome.single_success');
+		outcomeType = t('dav20.outcome.single_success', null, localeChain);
 	} else if (outcome.botches > 0 && outcome.hits == 0) {
-		outcomeType = t('dav20.outcome.botch');
+		outcomeType = t('dav20.outcome.botch', null, localeChain);
 	} else {
-		outcomeType = t('dav20.outcome.failure');
+		outcomeType = t('dav20.outcome.failure', null, localeChain);
 	}
 
 	notes = [];
 
 	if (!outcome.botching) {
-		notes.push(t('dav20.notes.no_botches'));
+		notes.push(t('dav20.notes.no_botches', null, localeChain));
 	}
 
 	if (outcome.willpower) {
-		notes.push(t('dav20.notes.willpower'));
+		notes.push(t('dav20.notes.willpower', null, localeChain));
 	}
 
 	if (outcome.specialty) {
-		notes.push(t('dav20.notes.specialty'));
+		notes.push(t('dav20.notes.specialty', null, localeChain));
 	}
 
 	return t('dav20.text', {
@@ -256,18 +396,18 @@ function dav20ToText(outcome) {
 		pool: outcome.pool,
 		difficulty: outcome.difficulty,
 		results: prettyResults.join(', '),
-		options: notes.length > 0 ? notes.join(', ') : t('dav20.options_none')
-	});
+		options: notes.length > 0 ? notes.join(', ') : t('dav20.options_none', null, localeChain)
+	}, localeChain);
 }
 
-function nwodToText(outcome) {
+function nwodToText(outcome, localeChain) {
 	if (outcome.errors.length > 0) {
-		return t('nwod.error_prefix') + outcome.errors.join("; ");
+		return t('nwod.error_prefix', null, localeChain) + outcome.errors.join("; ");
 	} else if (outcome.pool < 1) {
 		return t('nwod.chance_roll', {
-			successes: suxxToWords(outcome.successes),
+			successes: suxxToWords(outcome.successes, localeChain),
 			results: outcome.results.join(', ')
-		});
+		}, localeChain);
 	}
 
 	var newResults = outcome.results;
@@ -284,28 +424,28 @@ function nwodToText(outcome) {
 	
 	notes = [];
 	if (outcome.again == 8 || outcome.again == 9) {
-		notes.push(t('nwod.notes.again', { again: outcome.again }));
+		notes.push(t('nwod.notes.again', { again: outcome.again }, localeChain));
 	}
 	if (outcome.botching) {
-		notes.push(t('nwod.notes.botch'));
+		notes.push(t('nwod.notes.botch', null, localeChain));
 	}
 	if (outcome.rote) {
-		notes.push(t('nwod.notes.rote'));
+		notes.push(t('nwod.notes.rote', null, localeChain));
 	}
 	if (outcome.again == 11) {
-		notes.push(t('nwod.notes.no_rerolls'));
+		notes.push(t('nwod.notes.no_rerolls', null, localeChain));
 	}
 
 	return t('nwod.roll', {
 		pool: outcome.pool,
 		notes: notes.length > 0 ? ' (' + notes.join(", ") + ')' : '',
-		successes: suxxToWords(outcome.successes),
+		successes: suxxToWords(outcome.successes, localeChain),
 		results: newResults.join(', ')
-	});
+	}, localeChain);
 }
 
-function generateTableContent(initTable) {
-	var ret = t('initiative.table_header');
+function generateTableContent(initTable, localeChain) {
+	var ret = t('initiative.table_header', null, localeChain);
 
 	var chars = initTable.characters;
 
@@ -316,18 +456,18 @@ function generateTableContent(initTable) {
 
 	for (const charIndex in keys) {
 		charName = keys[charIndex];
-		var forcesText = (initTable.forces[charName] ? t('initiative.forced_by', { name: initTable.forces[charName] }) : "");
+		var forcesText = (initTable.forces[charName] ? t('initiative.forced_by', { name: initTable.forces[charName] }, localeChain) : "");
 		ret += chars[charName].toString().padStart(padLength) + " : " + charName + forcesText + "\n";
 	}
 
-	ret += t('initiative.table_footer');
+	ret += t('initiative.table_footer', null, localeChain);
 
 	return ret;
 }
 
-function nwodInitForceToText(msg, val, name) {
+function nwodInitForceToText(msg, val, name, localeChain) {
 	if (!/^\d+$/.test(val)) {
-		msg.reply(t('initiative.force_error'));
+		msg.reply(t('initiative.force_error', null, localeChain));
 		return;
 	}
 
@@ -343,7 +483,7 @@ function nwodInitForceToText(msg, val, name) {
 	initTables[channelId].characters[name] = val;
 	initTables[channelId].forces[name] = name;
 
-	var tableContent = generateTableContent(initTables[channelId]);
+	var tableContent = generateTableContent(initTables[channelId], localeChain);
 	if (initTables[channelId].msg) {
 		initTables[channelId].msg.delete();
 	}
@@ -354,7 +494,7 @@ function nwodInitForceToText(msg, val, name) {
 	
 }
 
-function nwodInitToText(msg, offset, name) {
+function nwodInitToText(msg, offset, name, localeChain) {
 	if (!/^\d+$/.test(offset)) {
 		offset = 0;
 	} else {
@@ -368,7 +508,7 @@ function nwodInitToText(msg, offset, name) {
 
 	var roll = d10();
 	var channelId = msg["channel"].id;
-	var content = t('initiative.roll', { name: name, roll: roll, offset: offset, total: roll + offset });
+	var content = t('initiative.roll', { name: name, roll: roll, offset: offset, total: roll + offset }, localeChain);
 	msg.reply(content).then(function (notificationMsg) {
 		if (!initTables[channelId]) {
 			initTables[channelId] = { characters: {}, forces: {} };
@@ -376,7 +516,7 @@ function nwodInitToText(msg, offset, name) {
 
 		initTables[channelId].characters[name] = roll + offset;
 
-		var tableContent = generateTableContent(initTables[channelId]);
+		var tableContent = generateTableContent(initTables[channelId], localeChain);
 		if (initTables[channelId].msg) {
 			initTables[channelId].msg.delete();
 		}
@@ -387,9 +527,9 @@ function nwodInitToText(msg, offset, name) {
 	});
 }
 
-function nwodInitClear(msg) {
+function nwodInitClear(msg, localeChain) {
 	var channelId = msg["channel"].id;
-	msg.reply(t('initiative.cleared'));
+	msg.reply(t('initiative.cleared', null, localeChain));
 	initTables[channelId] = { characters: {}, forces: {} };
 }
 
@@ -401,19 +541,19 @@ function on_ready(client) {
 function wcRem(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only'));
 		return;
 	}
 
 	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply(t('wordcount.channel_missing'));
+		msg.reply(tMsg(msg, 'wordcount.channel_missing'));
 		return;
 	}
 
@@ -425,23 +565,23 @@ function wcRem(msg, channel_id) {
 		wc[guild.id].listen_channels = wc[guild.id].listen_channels.filter(function (val, ind) {
 			return val != channel_id;
 		});
-		msg.reply(t('wordcount.channel_removed', { name: channel.name }));
+		msg.reply(tMsg(msg, 'wordcount.channel_removed', { name: channel.name }));
 
 		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 	} else {
-		msg.reply(t('wordcount.channel_not_listed', { name: channel.name }));
+		msg.reply(tMsg(msg, 'wordcount.channel_not_listed', { name: channel.name }));
 	}
 }
 
 function wcAdd(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -452,15 +592,15 @@ function wcAdd(msg, channel_id) {
 	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply(t('wordcount.channel_missing_lower'));
+		msg.reply(tMsg(msg, 'wordcount.channel_missing_lower'));
 		return;
 	}
 
 	if (wc[guild.id].listen_channels.includes(channel_id)) {
-		msg.reply(t('wordcount.channel_already_added'));
+		msg.reply(tMsg(msg, 'wordcount.channel_already_added'));
 	} else {
 		wc[guild.id].listen_channels.push(channel_id);
-		msg.reply(t('wordcount.channel_added', { name: channel.name }));
+		msg.reply(tMsg(msg, 'wordcount.channel_added', { name: channel.name }));
 		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 	}
 }
@@ -468,12 +608,12 @@ function wcAdd(msg, channel_id) {
 function wcList(msg) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only'));
 		return;
 	}
 
@@ -484,11 +624,11 @@ function wcList(msg) {
 	var channels = guild.channels.cache.filter(chan => wc[guild.id].listen_channels.includes(chan.id)).array();
 
 	if (channels.length == 0) {
-		msg.reply(t('wordcount.no_wordcount_channels'));
+		msg.reply(tMsg(msg, 'wordcount.no_wordcount_channels'));
 		return;
 	}
 
-	var reply = t('wordcount.list_header');
+	var reply = tMsg(msg, 'wordcount.list_header');
 
 	for (i = 0; i < channels.length; i++) {
 		reply += channels[i].name + "\n";
@@ -500,12 +640,12 @@ function wcList(msg) {
 function wcOOC(msg, channel_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -516,13 +656,13 @@ function wcOOC(msg, channel_id) {
 	var channel = guild.channels.cache.find(chan => chan.id == channel_id);
 
 	if (channel == null) {
-		msg.reply(t('wordcount.channel_missing_lower'));
+		msg.reply(tMsg(msg, 'wordcount.channel_missing_lower'));
 		return;
 	}
 
 	wc[guild.id].ooc_channel = channel.id;
 
-	msg.reply(t('wordcount.ooc_set', { name: channel.name }));
+	msg.reply(tMsg(msg, 'wordcount.ooc_set', { name: channel.name }));
 }
 
 function wordCount(prose) {
@@ -534,12 +674,12 @@ function wordCount(prose) {
 function wcRA(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -549,7 +689,7 @@ function wcRA(msg, role_id) {
 	
 	guild.roles.fetch(role_id).then(role => {
 		if (role == null) {
-			msg.reply(t('wordcount.role_missing'));
+			msg.reply(tMsg(msg, 'wordcount.role_missing'));
 			return;
 		}
 	
@@ -558,10 +698,10 @@ function wcRA(msg, role_id) {
 		}
 	
 		if (wc[guild.id].roles.includes(role_id)) {
-			msg.reply(t('wordcount.role_already_added'));
+			msg.reply(tMsg(msg, 'wordcount.role_already_added'));
 		} else {
 			wc[guild.id].roles.push(role_id);
-			msg.reply(t('wordcount.role_added', { name: role.name }));
+			msg.reply(tMsg(msg, 'wordcount.role_added', { name: role.name }));
 			fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 		}
 	});
@@ -570,12 +710,12 @@ function wcRA(msg, role_id) {
 function wcRR(msg, role_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only_lower'));
 		return;
 	}
 
@@ -586,7 +726,7 @@ function wcRR(msg, role_id) {
 	guild.roles.fetch(role_id).then(role => {
 		wc[guild.id].roles = wc[guild.id].roles.filter(function (val, ind) { return val != role_id });
 
-		msg.reply(t('wordcount.role_removed', { name: role ? role.name : role_id }));
+		msg.reply(tMsg(msg, 'wordcount.role_removed', { name: role ? role.name : role_id }));
 
 		fs.writeFile('wc.json', JSON.stringify(wc), function () {});
 	});
@@ -599,6 +739,7 @@ function wordCountConsider(msg) {
 	}
 
 	var channel = msg.channel;
+	var localeChain = getLocaleChainForMsg(msg);
 
 	if (wc[guild.id] == null || !wc[guild.id].listen_channels.includes(channel.id.toString())) {
 		return;
@@ -650,7 +791,7 @@ function wordCountConsider(msg) {
 			words: wordCountCalc,
 			reward: reward,
 			total: wc[guild.id].users[msg.author.id].bonus_points
-		}));
+		}, localeChain));
 		wc[guild.id].users[msg.author.id].last_sent = now + 3600;
 	}
 	
@@ -659,30 +800,30 @@ function wordCountConsider(msg) {
 
 function wcForce(msg, user_id, bp_total, wc_total) {
 	if (user_id == null || isNaN(user_id)) {
-		msg.reply(t('wordcount.force_user_missing'));
+		msg.reply(tMsg(msg, 'wordcount.force_user_missing'));
 		return;
 	}
 
 	if (bp_total == null || isNaN(bp_total) ) {
-		msg.reply(t('wordcount.force_bp_invalid'));
+		msg.reply(tMsg(msg, 'wordcount.force_bp_invalid'));
 		return;
 	}
 
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only_lower'));
 		return;
 	}
 
 	if (!isAdmin(msg.member)) {
-		msg.reply(t('wordcount.admin_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.admin_only_lower'));
 		return;
 	}
 
 	var user = guild.members.cache.array().filter(member => member.user.id == user_id)[0];
 
 	if (user == null) {
-		msg.reply(t('wordcount.user_missing'));
+		msg.reply(tMsg(msg, 'wordcount.user_missing'));
 		return;
 	}
 
@@ -703,7 +844,7 @@ function wcForce(msg, user_id, bp_total, wc_total) {
 		wc[guild.id].users[user.id].word_count = parseInt(wc_total);
 	}
 
-	msg.reply(t('wordcount.force_confirm', {
+	msg.reply(tMsg(msg, 'wordcount.force_confirm', {
 		user: user.toString(),
 		points: wc[guild.id].users[user.id].bonus_points,
 		count: wc[guild.id].users[user.id].word_count
@@ -715,7 +856,7 @@ function wcForce(msg, user_id, bp_total, wc_total) {
 function wcShow(msg, user_id) {
 	var guild = msg.guild;
 	if (guild == null) {
-		msg.reply(t('wordcount.guild_only_lower'));
+		msg.reply(tMsg(msg, 'wordcount.guild_only_lower'));
 		return;
 	}
 
@@ -747,7 +888,7 @@ function wcShow(msg, user_id) {
 		word_count = "no";
 	}
 
-	msg.reply(t('wordcount.status', {
+	msg.reply(tMsg(msg, 'wordcount.status', {
 		user: user.toString(),
 		points: wc[guild.id].users[user.id].bonus_points,
 		count: wc[guild.id].users[user.id].word_count
@@ -757,33 +898,75 @@ function wcShow(msg, user_id) {
 async function handle_message(msg) {
 	const words = msg.content.split(/\s+/);
 	const command = words[0].toLowerCase();
+	const localeChain = getLocaleChainForMsg(msg);
 
 	switch (command) {
 		case '!nwod':
-			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2]));
+			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2], localeChain), localeChain);
 			console.log(t('console.roll_nwod', {
 				user: `${msg.author.username}#${msg.author.discriminator}`,
 				outcome: nWoDoutcome
-			}));
+			}, localeChain));
 			msg.reply(nWoDoutcome);
 			break;
 		case '!dav20':
-			const dav20outcome = dav20ToText(dav20Roll(words[1], words[2], words[3]));
+			const dav20outcome = dav20ToText(dav20Roll(words[1], words[2], words[3], localeChain), localeChain);
 			console.log(t('console.roll_dav20', {
 				user: `${msg.author.username}#${msg.author.discriminator}`,
 				outcome: dav20outcome
-			}));
+			}, localeChain));
 			msg.reply(dav20outcome);
 			break;
 		case '!init':
-			nwodInitToText(msg, words[1], words[2]);
+			nwodInitToText(msg, words[1], words[2], localeChain);
 			break;
 		case '!initforce':
-			nwodInitForceToText(msg, words[1], words[2]);
+			nwodInitForceToText(msg, words[1], words[2], localeChain);
 			break;
 		case '!initclear':
-			nwodInitClear(msg);
+			nwodInitClear(msg, localeChain);
 			break;
+		case '!server-language': {
+			if (!msg.guild) {
+				msg.reply(t('locales.guild_only', null, localeChain));
+				break;
+			}
+			const guildOwnerId = msg.guild.ownerId || msg.guild.ownerID;
+			if (!isAdmin(msg.member) && guildOwnerId !== msg.author.id) {
+				msg.reply(t('locales.admin_only', null, localeChain));
+				break;
+			}
+			const requestedLocale = words[1] ? words[1].toLowerCase() : '';
+			if (!requestedLocale) {
+				msg.reply(t('locales.missing_locale', null, localeChain));
+				break;
+			}
+			if (!availableLocales.has(requestedLocale)) {
+				msg.reply(t('locales.unknown_locale', { locales: Array.from(availableLocales).sort().join(', ') }, localeChain));
+				break;
+			}
+			localeConfig.server_locales = localeConfig.server_locales || {};
+			localeConfig.server_locales[msg.guild.id] = requestedLocale;
+			saveLocaleConfig();
+			msg.reply(t('locales.server_set', { locale: requestedLocale }, getLocaleChainForMsg(msg)));
+			break;
+		}
+		case '!language': {
+			const requestedLocale = words[1] ? words[1].toLowerCase() : '';
+			if (!requestedLocale) {
+				msg.reply(t('locales.missing_locale', null, localeChain));
+				break;
+			}
+			if (!availableLocales.has(requestedLocale)) {
+				msg.reply(t('locales.unknown_locale', { locales: Array.from(availableLocales).sort().join(', ') }, localeChain));
+				break;
+			}
+			localeConfig.user_locales = localeConfig.user_locales || {};
+			localeConfig.user_locales[msg.author.id] = requestedLocale;
+			saveLocaleConfig();
+			msg.reply(t('locales.user_set', { locale: requestedLocale }, getLocaleChainForMsg(msg)));
+			break;
+		}
 		case '!wc-add':
 			wcAdd(msg, words[1]);
 			break;
@@ -816,7 +999,7 @@ async function handle_message(msg) {
                                         guildNames.push(`${guild.name} (${guild.id})`);
                                 });
                         }
-                        sendLongMessage(msg.channel, guildNames.join('\n') || t('admin_tools.no_guilds'));
+                        sendLongMessage(msg.channel, guildNames.join('\n') || t('admin_tools.no_guilds', null, localeChain));
                         break;
                 case '!channels':
                         if (!isTrueAdmin(msg.author.id)) break;
@@ -832,12 +1015,12 @@ async function handle_message(msg) {
                                                 const categoryInfo = category ? ` - ${category.name} (${category.id})` : '';
                                                 channelNames.push(`${ch.name} (${ch.id})${categoryInfo}`);
                                         });
-                                        sendLongMessage(msg.channel, channelNames.join('\n') || t('admin_tools.no_channels'));
+                                        sendLongMessage(msg.channel, channelNames.join('\n') || t('admin_tools.no_channels', null, localeChain));
                                         break;
                                 }
                         }
                         if (!guildFound) {
-                                msg.reply(t('admin_tools.guild_not_found'));
+                                msg.reply(t('admin_tools.guild_not_found', null, localeChain));
                         }
                         break;
                 case '!say':
@@ -880,11 +1063,11 @@ async function handle_message(msg) {
                                 }
                         }
                         if (!channelFound) {
-                                msg.reply(t('admin_tools.channel_not_found'));
+                                msg.reply(t('admin_tools.channel_not_found', null, localeChain));
                         } else if (messageId && !messageFound) {
-                                msg.reply(t('admin_tools.message_not_found'));
+                                msg.reply(t('admin_tools.message_not_found', null, localeChain));
                         } else if (sent) {
-                                msg.reply(t('admin_tools.message_sent'));
+                                msg.reply(t('admin_tools.message_sent', null, localeChain));
                         }
                         break;
                 case '!read':
@@ -915,7 +1098,7 @@ async function handle_message(msg) {
                                 }
                         }
                         if (!located) {
-                                msg.reply(t('admin_tools.channel_not_found'));
+                                msg.reply(t('admin_tools.channel_not_found', null, localeChain));
                         }
                         break;
         }

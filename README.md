@@ -75,6 +75,16 @@ To show your or another user's Word Count and Bonus Point count:
 `!wc [<user-id>]`
 `!wc 652113678398494975`
 
+## Language Settings
+
+To set your personal language:
+`!language <locale>`
+`!language fr`
+
+To set a server-wide language (admins/owner only):
+`!server-language <locale>`
+`!server-language ru`
+
 ## Vampire: the Masquerade, Dark Ages, 20th Edition
 
 DAV20 dice succeed when the roll outcome is above the difficulty, and don't explode on 10s. It also botches on 1s.

@@ -92,5 +92,13 @@
     "channel_not_found": "Channel not found.",
     "message_not_found": "Message not found.",
     "message_sent": "Message sent."
+  },
+  "locales": {
+    "guild_only": "This command must be used in a guild.",
+    "admin_only": "Only administrators or the server owner may set the server language.",
+    "missing_locale": "Please provide a locale code.",
+    "unknown_locale": "That locale isn't available. Available: {locales}",
+    "server_set": "Server language set to {locale}.",
+    "user_set": "Your language has been set to {locale}."
   }
 }
