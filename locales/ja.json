@@ -92,5 +92,13 @@
     "channel_not_found": "チャンネルが見つかりません。",
     "message_not_found": "メッセージが見つかりません。",
     "message_sent": "メッセージを送信しました。"
+  },
+  "locales": {
+    "guild_only": "このコマンドはサーバーで使用する必要があります。",
+    "admin_only": "サーバーの言語を設定できるのは管理者またはサーバー所有者のみです。",
+    "missing_locale": "ロケールコードを教えてください。",
+    "unknown_locale": "そのロケールは利用できません。利用可能なロケール: {locales}",
+    "server_set": "サーバーの言語が{locale}に設定されました。",
+    "user_set": "言語が{locale}に設定されました。"
   }
 }

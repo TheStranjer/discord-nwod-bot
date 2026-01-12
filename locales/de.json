@@ -92,5 +92,13 @@
     "channel_not_found": "Kanal nicht gefunden.",
     "message_not_found": "Nachricht nicht gefunden.",
     "message_sent": "Nachricht gesendet."
+  },
+  "locales": {
+    "guild_only": "Dieser Befehl muss auf einem Server verwendet werden.",
+    "admin_only": "Nur Administratoren oder der Serverbesitzer dürfen die Serversprache festlegen.",
+    "missing_locale": "Bitte geben Sie einen Gebietsschema-Code an.",
+    "unknown_locale": "Diese Locale ist nicht verfügbar. Verfügbar: {locales}",
+    "server_set": "Serversprache auf {locale} gesetzt.",
+    "user_set": "Ihre Sprache wurde auf {locale} eingestellt."
   }
 }

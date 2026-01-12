@@ -92,5 +92,13 @@
     "channel_not_found": "Canal não encontrado.",
     "message_not_found": "Mensagem não encontrada.",
     "message_sent": "Mensagem enviada."
+  },
+  "locales": {
+    "guild_only": "Este comando deve ser usado em um servidor.",
+    "admin_only": "Apenas administradores ou o proprietário do servidor podem definir o idioma do servidor.",
+    "missing_locale": "Por favor, forneça um código de localidade.",
+    "unknown_locale": "Essa configuração regional não está disponível. Disponíveis: {locales}",
+    "server_set": "Idioma do servidor definido para {locale}.",
+    "user_set": "Seu idioma foi definido para {locale}."
   }
 }

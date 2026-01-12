@@ -92,5 +92,13 @@
     "channel_not_found": "未找到频道。",
     "message_not_found": "未找到消息。",
     "message_sent": "消息已发送。"
+  },
+  "locales": {
+    "guild_only": "此命令必须在服务器中使用。",
+    "admin_only": "只有管理员或服务器所有者可以设置服务器语言。",
+    "missing_locale": "请提供一个区域设置代码。",
+    "unknown_locale": "该区域设置不可用。可用：{locales}",
+    "server_set": "服务器语言已设置为{locale}。",
+    "user_set": "您的语言已设置为{locale}。"
   }
 }
