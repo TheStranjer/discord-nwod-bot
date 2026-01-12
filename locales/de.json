@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "Glücksfee",
+    "startup_description": "Ein Würfelbot für Discord mit Ad-hoc-Regeln",
+    "startup_author": "Der Fremde",
+    "d10_refill_start": "Es sind noch {count} d10 übrig. Nachfüllen...",
+    "d10_refill_done": "d10s ist jetzt bei {count}.",
+    "logged_in": "Eingeloggt als {tag}!",
+    "roll_nwod": "Neuer nWoD-Wurf von {user}. Ergebnis: {outcome}",
+    "roll_dav20": "Neuer dav20-Wurf von {user}. Ergebnis: {outcome}",
+    "logging_in": "Anmeldung läuft...",
+    "stored_results_update": "Gespeicherte Ergebnisse werden aktualisiert"
+  },
+  "dav20": {
+    "error_prefix": "Das Schicksal kann Ihre Anfrage nicht entscheiden, weil: ",
+    "errors": {
+      "pool_range": "Pool muss eine Zahl zwischen 1 und 25 sein",
+      "difficulty_range": "Es muss eine Schwierigkeit zwischen 1 und 10 zugewiesen werden"
+    },
+    "outcome": {
+      "multi_success": "{count} Erfolge!",
+      "single_success": "Einzelerfolge!",
+      "botch": "Verpfuscht!",
+      "failure": "Fehler..."
+    },
+    "notes": {
+      "no_botches": "Keine Patzer",
+      "willpower": "Mit Willenskraft",
+      "specialty": "Verwendung der Fachrichtung"
+    },
+    "options_none": "Keine",
+    "text": "**Ergebnis:** {outcome}\n**Pool:** {pool}\n**Schwierigkeit:** {difficulty}\n**Ergebnisse:** {results}\n**Optionen:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "Das Schicksal kann Ihre Anfrage nicht beurteilen, weil: ",
+    "errors": {
+      "pool_nan": "Pool muss eine Zahl sein",
+      "again_nan": "Der Wert der explodierenden Würfel muss eine Zahl sein",
+      "again_low": "Explodierende Würfel dürfen nicht unter 8 liegen.",
+      "pool_high": "Es können nicht mehr als 25 Würfel geworfen werden"
+    },
+    "chance_roll": "Würfle einen Glückswürfel mit {successes}. _Einzelergebnisse:_ {results}",
+    "notes": {
+      "again": "{again}- Noch einmal",
+      "botch": "Der Patzer von Ones",
+      "rote": "Routineaktion",
+      "no_rerolls": "Keine Neuwürfe"
+    },
+    "roll": "Würfeln {pool}{notes}; {successes}. _Einzelergebnisse:_ {results}",
+    "successes": "{count} Erfolg{suffix}",
+    "no_success": "Kein Erfolg",
+    "again_suffix": " ({again}-Noch einmal)",
+    "no_rerolls": "(Keine Neuwürfe)"
+  },
+  "initiative": {
+    "table_header": "**Initiativtabelle**\n\n```\n",
+    "table_footer": "Kein Inhalt",
+    "forced_by": " (erzwungen von {name})",
+    "force_error": "Die Initialisierungstabelle kann nur erzwungen werden, wenn eine Zahl angegeben wird",
+    "roll": "Initiative für {name} würfeln: {roll} (Würfelergebnis) + {offset} = {total}",
+    "cleared": "Initiativtabelle gelöscht"
+  },
+  "wordcount": {
+    "guild_only": "Dieser Befehl muss auf einem Server verwendet werden.",
+    "guild_only_lower": "dieser Befehl muss auf einem Server verwendet werden.",
+    "admin_only": "Nur Administratoren dürfen diesen Befehl verwenden.",
+    "admin_only_lower": "nur Administratoren dürfen diesen Befehl verwenden.",
+    "channel_missing": "Dieser Kanal existiert auf diesem Server nicht.",
+    "channel_missing_lower": "der Kanal existiert nicht auf diesem Server",
+    "channel_removed": "Der Kanal {name} wurde entfernt.",
+    "channel_not_listed": "Der Kanal {name} ist nicht in der Wortzähl-Liste.",
+    "channel_already_added": "Dieser Kanal wurde bereits hinzugefügt.",
+    "channel_added": "Hinzugefügt {name}",
+    "no_wordcount_channels": "Dieser Server hat keine Kanäle zur Wortzählung.",
+    "list_header": "Die Wortzählkanäle sind:",
+    "ooc_set": "OOC-Auszeichnungskanal auf {name} gesetzt",
+    "role_missing": "Die Rolle existiert auf diesem Server nicht",
+    "role_already_added": "Diese Rolle wurde bereits hinzugefügt.",
+    "role_added": "Hinzugefügt {name}",
+    "role_removed": "Rolle {name} entfernt.",
+    "force_user_missing": "Sie müssen den Benutzer angeben, dessen Gesamtbetrag Sie erzwingen.",
+    "force_bp_invalid": "Sie müssen eine Gesamtzahl an Bonuspunkten einreichen, und diese muss eine Zahl sein",
+    "user_missing": "Dieser Benutzer ist nicht auf diesem Server.",
+    "force_confirm": "{user} hat jetzt {points} Bonuspunkte und einen Wortzähl-Cache von {count}.",
+    "status": "{user} hat {points} Bonuspunkte und es fehlen {count} Wörter bis zum nächsten Bonuspunkt.",
+    "ooc_award": "{user} hat einen Beitrag mit {words} Wörtern geschrieben und dabei {reward} Bonuspunkte verdient. Die Gesamtsumme dieses Nutzers beträgt jetzt {total}."
+  },
+  "admin_tools": {
+    "no_guilds": "Keine Gilden.",
+    "no_channels": "Keine Kanäle.",
+    "guild_not_found": "Gilde nicht gefunden.",
+    "channel_not_found": "Kanal nicht gefunden.",
+    "message_not_found": "Nachricht nicht gefunden.",
+    "message_sent": "Nachricht gesendet."
+  }
+}

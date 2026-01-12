@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "Dama Fortuna",
+    "startup_description": "Un bot de dados para Discord con reglas ad hoc",
+    "startup_author": "El extranjero",
+    "d10_refill_start": "Quedan {count} d10. Reabasteciendo...",
+    "d10_refill_done": "d10s ahora está en {count}.",
+    "logged_in": "Conectado como {tag}!",
+    "roll_nwod": "Nueva tirada de dados de nWoD de {user}. Resultado: {outcome}",
+    "roll_dav20": "Nueva tirada dav20 de {user}. Resultado: {outcome}",
+    "logging_in": "Iniciando sesión ahora...",
+    "stored_results_update": "Actualizando resultados almacenados"
+  },
+  "dav20": {
+    "error_prefix": "El destino no puede resolver su solicitud porque: ",
+    "errors": {
+      "pool_range": "Pool debe ser un número entre 1 y 25",
+      "difficulty_range": "Debe asignar una dificultad entre 1 y 10"
+    },
+    "outcome": {
+      "multi_success": "¡{count} éxitos!",
+      "single_success": "¡Éxitos individuales!",
+      "botch": "¡Qué chapuza!",
+      "failure": "Fallo..."
+    },
+    "notes": {
+      "no_botches": "Sin fallos",
+      "willpower": "Usando la fuerza de voluntad",
+      "specialty": "Usando la especialidad"
+    },
+    "options_none": "Ninguno",
+    "text": "**Resultado:** {outcome}\n**Pool:** {pool}\n**Dificultad:** {difficulty}\n**Resultados:** {results}\n**Opciones:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "El destino no puede decidir sobre su solicitud porque: ",
+    "errors": {
+      "pool_nan": "Pool debe ser un número",
+      "again_nan": "El valor de los dados explosivos debe ser un número",
+      "again_low": "Los dados explosivos no pueden ser menores que 8.",
+      "pool_high": "No se puede lanzar más de 25 dados"
+    },
+    "chance_roll": "Lanzando un dado de oportunidad con {successes}. _Resultados individuales:_ {results}",
+    "notes": {
+      "again": "{again}- De nuevo",
+      "botch": "La chapuza de Ones",
+      "rote": "Acción rutinaria",
+      "no_rerolls": "Sin reintentos"
+    },
+    "roll": "Lanzando {pool}{notes}; {successes}. _Resultados individuales:_ {results}",
+    "successes": "{count} éxito{suffix}",
+    "no_success": "Sin éxito",
+    "again_suffix": " ({again}-De nuevo)",
+    "no_rerolls": "(Sin reintentos)"
+  },
+  "initiative": {
+    "table_header": "**Tabla de iniciativa**\n\n```\n",
+    "table_footer": "Sin contenido",
+    "forced_by": " (forzado por {name})",
+    "force_error": "Solo se puede forzar la tabla init si se proporciona un número",
+    "roll": "Iniciativa para {name}: {roll} (resultado de la tirada) + {offset} = {total}",
+    "cleared": "Tabla de iniciativa borrada"
+  },
+  "wordcount": {
+    "guild_only": "Este comando debe usarse en un servidor.",
+    "guild_only_lower": "este comando debe usarse en un servidor.",
+    "admin_only": "Solo los administradores pueden usar este comando.",
+    "admin_only_lower": "solo los administradores pueden usar este comando.",
+    "channel_missing": "El canal no existe en este servidor.",
+    "channel_missing_lower": "el canal no existe en este servidor",
+    "channel_removed": "El canal {name} ha sido eliminado.",
+    "channel_not_listed": "El canal {name} no está en la lista de conteo de palabras.",
+    "channel_already_added": "Ese canal ya está añadido.",
+    "channel_added": "Añadido {name}",
+    "no_wordcount_channels": "Este servidor no tiene canales de conteo de palabras.",
+    "list_header": "Los canales de conteo de palabras son:",
+    "ooc_set": "Canal de premios OOC establecido en {name}",
+    "role_missing": "el rol no existe en este servidor",
+    "role_already_added": "Ese rol ya está añadido.",
+    "role_added": "Añadido {name}",
+    "role_removed": "Se eliminó el rol {name}.",
+    "force_user_missing": "Debe especificar al usuario cuyo total está forzando.",
+    "force_bp_invalid": "Debe enviar un total de puntos de bonificación, y debe ser un número",
+    "user_missing": "ese usuario no está en este servidor.",
+    "force_confirm": "{user} ahora tiene {points} puntos de bonificación y una caché del recuento de palabras de {count}.",
+    "status": "{user} tiene {points} puntos de bonificación y le faltan {count} palabras para el siguiente.",
+    "ooc_award": "{user} escribió una publicación de {words} palabras, ganando {reward} puntos de bonificación. El total de este usuario ahora es {total}."
+  },
+  "admin_tools": {
+    "no_guilds": "No hay gremios.",
+    "no_channels": "No hay canales.",
+    "guild_not_found": "Gremio no encontrado.",
+    "channel_not_found": "Canal no encontrado.",
+    "message_not_found": "Mensaje no encontrado.",
+    "message_sent": "Mensaje enviado."
+  }
+}

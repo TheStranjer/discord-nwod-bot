@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "Dame Fortune",
+    "startup_description": "Un bot de dés pour Discord avec des règles ad hoc",
+    "startup_author": "L'étranger",
+    "d10_refill_start": "Il reste {count} d10. Réapprovisionnement...",
+    "d10_refill_done": "d10s est maintenant à {count}.",
+    "logged_in": "Connecté en tant que {tag} !",
+    "roll_nwod": "Nouveau lancer de dés nWoD de {user}. Résultat : {outcome}",
+    "roll_dav20": "Nouveau jet dav20 de {user}. Résultat : {outcome}",
+    "logging_in": "Connexion en cours...",
+    "stored_results_update": "Mise à jour des résultats stockés"
+  },
+  "dav20": {
+    "error_prefix": "Le destin ne peut pas statuer sur votre demande car: ",
+    "errors": {
+      "pool_range": "Pool doit être un nombre entre 1 et 25",
+      "difficulty_range": "Vous devez attribuer un niveau de difficulté compris entre 1 et 10"
+    },
+    "outcome": {
+      "multi_success": "{count} succès !",
+      "single_success": "Succès individuels !",
+      "botch": "Quelle boulette !",
+      "failure": "Échec..."
+    },
+    "notes": {
+      "no_botches": "Pas d'erreurs",
+      "willpower": "En utilisant la volonté",
+      "specialty": "Utilisation de la spécialité"
+    },
+    "options_none": "Aucun",
+    "text": "**Résultat:** {outcome}\n**Pool:** {pool}\n**Difficulté:** {difficulty}\n**Résultats:** {results}\n**Options:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "Le destin ne peut pas statuer sur votre demande parce que : ",
+    "errors": {
+      "pool_nan": "Pool doit être un nombre",
+      "again_nan": "La valeur des dés explosifs doit être un nombre",
+      "again_low": "Les dés explosifs ne peuvent pas être inférieurs à 8.",
+      "pool_high": "Impossible de lancer plus de 25 dés"
+    },
+    "chance_roll": "Lancement d'un dé de chance avec {successes}. _Résultats individuels:_ {results}",
+    "notes": {
+      "again": "{again}- Encore",
+      "botch": "La bourde d'Ones",
+      "rote": "Action routinière",
+      "no_rerolls": "Pas de relances"
+    },
+    "roll": "Lancement de {pool}{notes}; {successes}. _Résultats individuels:_ {results}",
+    "successes": "{count} succès{suffix}",
+    "no_success": "Aucun succès",
+    "again_suffix": " ({again}-Encore)",
+    "no_rerolls": "(Pas de relances)"
+  },
+  "initiative": {
+    "table_header": "**Table d'initiative**\n\n```\n",
+    "table_footer": "Aucun contenu",
+    "forced_by": " (forcé par {name})",
+    "force_error": "On ne peut forcer la table init que si un nombre est fourni",
+    "roll": "Jet d'initiative pour {name}: {roll} (résultat du jet) + {offset} = {total}",
+    "cleared": "Tableau d'initiative effacé"
+  },
+  "wordcount": {
+    "guild_only": "Cette commande doit être utilisée sur un serveur.",
+    "guild_only_lower": "cette commande doit être utilisée sur un serveur.",
+    "admin_only": "Seuls les administrateurs peuvent utiliser cette commande.",
+    "admin_only_lower": "seuls les administrateurs peuvent utiliser cette commande.",
+    "channel_missing": "Ce canal n'existe pas sur ce serveur.",
+    "channel_missing_lower": "le canal n'existe pas sur ce serveur",
+    "channel_removed": "Le canal {name} a été supprimé.",
+    "channel_not_listed": "Le canal {name} n'est pas dans la liste de comptage des mots.",
+    "channel_already_added": "Ce canal a déjà été ajouté.",
+    "channel_added": "Ajouté {name}",
+    "no_wordcount_channels": "Ce serveur n'a aucun canal de comptage de mots.",
+    "list_header": "Les canaux de comptage de mots sont:",
+    "ooc_set": "Le canal de récompenses OOC a été défini sur {name}",
+    "role_missing": "le rôle n'existe pas sur ce serveur",
+    "role_already_added": "Ce rôle a déjà été ajouté.",
+    "role_added": "Ajouté {name}",
+    "role_removed": "Rôle {name} supprimé.",
+    "force_user_missing": "Vous devez spécifier l'utilisateur dont vous forcez le total.",
+    "force_bp_invalid": "Vous devez soumettre un total de points bonus, et cela doit être un nombre",
+    "user_missing": "cet utilisateur n'est pas sur ce serveur.",
+    "force_confirm": "{user} a maintenant {points} points bonus et un cache du décompte de mots de {count}.",
+    "status": "{user} a {points} points bonus et il manque {count} mots pour atteindre le suivant.",
+    "ooc_award": "{user} a écrit un message de {words} mots, gagnant {reward} points bonus. Le total de cet utilisateur est maintenant {total}."
+  },
+  "admin_tools": {
+    "no_guilds": "Aucune guilde.",
+    "no_channels": "Aucun canal.",
+    "guild_not_found": "Guilde introuvable.",
+    "channel_not_found": "Canal introuvable.",
+    "message_not_found": "Message non trouvé.",
+    "message_sent": "Message envoyé."
+  }
+}

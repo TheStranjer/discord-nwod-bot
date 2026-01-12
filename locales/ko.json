@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "행운의 여신",
+    "startup_description": "Ad hoc 규칙을 가진 Discord 주사위 봇",
+    "startup_author": "낯선 사람",
+    "d10_refill_start": "d10이 {count}개 남았습니다. 보충 중...",
+    "d10_refill_done": "d10s는 현재 {count}입니다.",
+    "logged_in": "{tag}으로 로그인했습니다!",
+    "roll_nwod": "새 nWoD 주사위 굴림: {user}. 결과: {outcome}",
+    "roll_dav20": "새로운 dav20 굴림이 {user}로부터 왔습니다. 결과: {outcome}",
+    "logging_in": "지금 로그인 중...",
+    "stored_results_update": "저장된 결과를 업데이트하는 중입니다"
+  },
+  "dav20": {
+    "error_prefix": "운명은 귀하의 요청을 판결할 수 없습니다. 이유: ",
+    "errors": {
+      "pool_range": "Pool은 1에서 25 사이의 숫자여야 합니다",
+      "difficulty_range": "난이도는 1에서 10 사이로 지정해야 합니다."
+    },
+    "outcome": {
+      "multi_success": "{count}번의 성공!",
+      "single_success": "개별 성공!",
+      "botch": "망쳤어!",
+      "failure": "실패..."
+    },
+    "notes": {
+      "no_botches": "실수 없음",
+      "willpower": "의지력을 사용 중",
+      "specialty": "전문 분야 사용"
+    },
+    "options_none": "없음",
+    "text": "**결과:** {outcome}\n**풀:** {pool}\n**난이도:** {difficulty}\n**결과 목록:** {results}\n**옵션:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "운명은 귀하의 요청을 판단할 수 없습니다. 이유: ",
+    "errors": {
+      "pool_nan": "Pool은 숫자여야 합니다.",
+      "again_nan": "폭발 주사위 값은 숫자여야 합니다",
+      "again_low": "폭발 주사위는 8 미만일 수 없습니다.",
+      "pool_high": "25개를 초과하여 주사위를 굴릴 수 없습니다"
+    },
+    "chance_roll": "기회 주사위를 {successes}로 굴립니다. _개별 결과:_ {results}",
+    "notes": {
+      "again": "{again}- 다시",
+      "botch": "Ones의 실수",
+      "rote": "루틴 동작",
+      "no_rerolls": "재굴림 불가"
+    },
+    "roll": "굴리는 중 {pool}{notes}; {successes}. _개별 결과:_ {results}",
+    "successes": "{count} 성공{suffix}",
+    "no_success": "성공하지 못했습니다",
+    "again_suffix": " ({again}-다시)",
+    "no_rerolls": "(재굴림 없음)"
+  },
+  "initiative": {
+    "table_header": "**이니셔티브 표**\n\n```\n",
+    "table_footer": "내용 없음",
+    "forced_by": " ({name}에 의해 강제)",
+    "force_error": "숫자가 제공된 경우에만 init 테이블을 강제할 수 있습니다",
+    "roll": "{name}의 이니셔티브 굴리기: {roll} (주사위 결과) + {offset} = {total}",
+    "cleared": "이니셔티브 표를 삭제했습니다"
+  },
+  "wordcount": {
+    "guild_only": "이 명령어는 서버에서 사용해야 합니다.",
+    "guild_only_lower": "이 명령은 길드에서 사용해야 합니다.",
+    "admin_only": "이 명령은 관리자만 사용할 수 있습니다.",
+    "admin_only_lower": "이 명령은 관리자만 사용할 수 있습니다.",
+    "channel_missing": "이 서버에 채널이 존재하지 않습니다.",
+    "channel_missing_lower": "이 서버에 채널이 존재하지 않습니다",
+    "channel_removed": "채널 {name}이(가) 제거되었습니다.",
+    "channel_not_listed": "채널 {name}이(가) 단어 수 목록에 없습니다.",
+    "channel_already_added": "해당 채널은 이미 추가되었습니다.",
+    "channel_added": "{name}을(를) 추가했습니다",
+    "no_wordcount_channels": "이 서버에는 단어 수 채널이 없습니다.",
+    "list_header": "단어 수 집계 채널은:",
+    "ooc_set": "OOC 수상 채널이 {name}(으)로 설정되었습니다",
+    "role_missing": "이 서버에 역할이 존재하지 않습니다",
+    "role_already_added": "해당 역할은 이미 추가되었습니다.",
+    "role_added": "{name}을(를) 추가했습니다",
+    "role_removed": "{name} 역할이 제거되었습니다.",
+    "force_user_missing": "합계를 강제로 적용하려는 사용자를 지정해야 합니다.",
+    "force_bp_invalid": "보너스 점수 합계를 제출해야 하며, 숫자여야 합니다",
+    "user_missing": "해당 사용자는 이 서버에 없습니다.",
+    "force_confirm": "{user}님은 현재 {points} 보너스 포인트를 보유하고 있으며, 단어 수 캐시는 {count}입니다.",
+    "status": "{user}는 {points} 보너스 포인트가 있으며 다음 보너스까지 {count} 단어가 남았습니다.",
+    "ooc_award": "{user}님이 {words} 단어의 글을 작성하여 {reward} 보너스 포인트를 획득했습니다. 이 사용자의 총액은 이제 {total}입니다."
+  },
+  "admin_tools": {
+    "no_guilds": "길드가 없습니다.",
+    "no_channels": "채널이 없습니다.",
+    "guild_not_found": "길드를 찾을 수 없습니다.",
+    "channel_not_found": "채널을 찾을 수 없습니다.",
+    "message_not_found": "메시지를 찾을 수 없습니다.",
+    "message_sent": "메시지가 전송되었습니다."
+  }
+}

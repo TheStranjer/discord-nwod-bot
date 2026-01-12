@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "幸運の女神",
+    "startup_description": "アドホックなルールを持つDiscord用ダイスボット",
+    "startup_author": "見知らぬ人",
+    "d10_refill_start": "d10が{count}個残っています。補充中...",
+    "d10_refill_done": "d10sは現在{count}です.",
+    "logged_in": "{tag}としてログインしました!",
+    "roll_nwod": "新しい nWoD のダイスロール：{user}。結果：{outcome}",
+    "roll_dav20": "新しい dav20 ロールが {user} から出されました。結果: {outcome}",
+    "logging_in": "今ログインしています...",
+    "stored_results_update": "保存された結果を更新しています"
+  },
+  "dav20": {
+    "error_prefix": "運命はあなたのリクエストを裁定できません。理由: ",
+    "errors": {
+      "pool_range": "Poolは1から25の間の数でなければなりません",
+      "difficulty_range": "難易度は1から10の間で指定する必要があります。"
+    },
+    "outcome": {
+      "multi_success": "{count}件の成功!",
+      "single_success": "個々の成功！",
+      "botch": "やらかした！",
+      "failure": "失敗..."
+    },
+    "notes": {
+      "no_botches": "失敗なし",
+      "willpower": "意志の力を使う",
+      "specialty": "専門分野の利用"
+    },
+    "options_none": "なし",
+    "text": "**結果:** {outcome}\n**プール:** {pool}\n**難易度:** {difficulty}\n**結果一覧:** {results}\n**オプション:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "運命はあなたのリクエストを裁定できません。理由：",
+    "errors": {
+      "pool_nan": "Poolは数値でなければなりません。",
+      "again_nan": "爆発するダイスの値は数値でなければなりません",
+      "again_low": "爆発ダイスは8未満に設定できません。",
+      "pool_high": "サイコロを25個以上振ることはできません"
+    },
+    "chance_roll": "チャンスダイスを{successes}で振ります。 _個別の結果:_ {results}",
+    "notes": {
+      "again": "{again}- もう一度",
+      "botch": "Onesの失敗",
+      "rote": "ルーティンアクション",
+      "no_rerolls": "リロール不可"
+    },
+    "roll": "ロール中 {pool}{notes}; {successes}. _個別の結果:_ {results}",
+    "successes": "{count} 成功{suffix}",
+    "no_success": "成功しませんでした",
+    "again_suffix": " ({again}-もう一度)",
+    "no_rerolls": "(リロールなし)"
+  },
+  "initiative": {
+    "table_header": "**イニシアチブ表**\n\n```\n",
+    "table_footer": "内容がありません",
+    "forced_by": " ({name}によって強制)",
+    "force_error": "数値が与えられている場合にのみ init テーブルを強制できます",
+    "roll": "{name} のイニシアチブを振る: {roll} (ロールの結果) + {offset} = {total}",
+    "cleared": "イニシアチブ表をクリアしました"
+  },
+  "wordcount": {
+    "guild_only": "このコマンドはギルド内で使用する必要があります。",
+    "guild_only_lower": "このコマンドはギルドで使用する必要があります。",
+    "admin_only": "このコマンドを使用できるのは管理者のみです。",
+    "admin_only_lower": "このコマンドを使用できるのは管理者のみです。",
+    "channel_missing": "このチャンネルはこのサーバーに存在しません。",
+    "channel_missing_lower": "このサーバーにチャンネルが存在しません",
+    "channel_removed": "チャンネル {name} は削除されました。",
+    "channel_not_listed": "チャンネル {name} は単語数リストに含まれていません。",
+    "channel_already_added": "そのチャンネルは既に追加されています。",
+    "channel_added": "{name}を追加しました",
+    "no_wordcount_channels": "このサーバーにはワードカウント用のチャンネルがありません。",
+    "list_header": "ワードカウントチャンネルは:",
+    "ooc_set": "OOC受賞チャンネルが{name}に設定されました",
+    "role_missing": "このサーバーにロールは存在しません",
+    "role_already_added": "そのロールは既に追加されています。",
+    "role_added": "{name}を追加しました",
+    "role_removed": "{name} の役割を削除しました。",
+    "force_user_missing": "合計を強制しているユーザーを指定する必要があります。",
+    "force_bp_invalid": "ボーナスポイントの合計を提出する必要があり、数値である必要があります",
+    "user_missing": "そのユーザーはこのサーバーにいません。",
+    "force_confirm": "{user}は現在{points}ボーナスポイントを持っており、単語数キャッシュは{count}です。",
+    "status": "{user}は{points}ボーナスポイントを持っており、次のボーナスまであと{count}語です。",
+    "ooc_award": "{user}さんが{words}語の投稿をして{reward}ボーナスポイントを獲得しました。このユーザーの合計は現在{total}です。"
+  },
+  "admin_tools": {
+    "no_guilds": "ギルドがありません。",
+    "no_channels": "チャンネルがありません。",
+    "guild_not_found": "ギルドが見つかりません。",
+    "channel_not_found": "チャンネルが見つかりません。",
+    "message_not_found": "メッセージが見つかりません。",
+    "message_sent": "メッセージを送信しました。"
+  }
+}

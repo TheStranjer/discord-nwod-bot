@@ -1,0 +1,96 @@
+{
+  "console": {
+    "startup_title": "幸运女神",
+    "startup_description": "具有临时规则的 Discord 掷骰机器人",
+    "startup_author": "陌生人",
+    "d10_refill_start": "d10还剩{count}个。正在补充...",
+    "d10_refill_done": "d10s 现在为 {count}.",
+    "logged_in": "已以{tag}登录!",
+    "roll_nwod": "来自 {user} 的新 nWoD 骰子投掷。结果：{outcome}",
+    "roll_dav20": "来自 {user} 的新 dav20 掷骰。结果：{outcome}",
+    "logging_in": "正在登录...",
+    "stored_results_update": "正在更新已保存的结果"
+  },
+  "dav20": {
+    "error_prefix": "命运无法裁定您的请求，因为: ",
+    "errors": {
+      "pool_range": "Pool 必须是介于1到25之间的数字",
+      "difficulty_range": "必须将难度设定为1到10之间。"
+    },
+    "outcome": {
+      "multi_success": "{count}次成功!",
+      "single_success": "单个成功！",
+      "botch": "搞砸了！",
+      "failure": "失败..."
+    },
+    "notes": {
+      "no_botches": "无失误",
+      "willpower": "使用意志力",
+      "specialty": "使用专长"
+    },
+    "options_none": "无",
+    "text": "**结果:** {outcome}\n**池:** {pool}\n**难度:** {difficulty}\n**结果列表:** {results}\n**选项:** {options}"
+  },
+  "nwod": {
+    "error_prefix": "命运无法裁定您的请求，因为：",
+    "errors": {
+      "pool_nan": "Pool 必须是数字。",
+      "again_nan": "爆炸骰子的值必须是一个数字",
+      "again_low": "爆裂骰子不能低于8。",
+      "pool_high": "不能掷超过25个骰子"
+    },
+    "chance_roll": "掷一个机会骰，成功数为 {successes}。 _各次结果：_ {results}",
+    "notes": {
+      "again": "{again}- 再次",
+      "botch": "Ones 的失误",
+      "rote": "例行操作",
+      "no_rerolls": "无法重掷"
+    },
+    "roll": "掷骰子 {pool}{notes}; {successes}. _各次结果:_ {results}",
+    "successes": "{count} 成功{suffix}",
+    "no_success": "没有成功",
+    "again_suffix": " ({again}-再次)",
+    "no_rerolls": "(无重投)"
+  },
+  "initiative": {
+    "table_header": "**先攻表**\n\n```\n",
+    "table_footer": "无内容",
+    "forced_by": " (由{name}强制)",
+    "force_error": "只有在提供数字时才能强制 init 表",
+    "roll": "为 {name} 掷定先: {roll} (掷骰结果) + {offset} = {total}",
+    "cleared": "已清除先攻表"
+  },
+  "wordcount": {
+    "guild_only": "此命令必须在服务器中使用。",
+    "guild_only_lower": "此命令必须在服务器中使用。",
+    "admin_only": "只有管理员可以使用此命令。",
+    "admin_only_lower": "只有管理员可以使用此命令。",
+    "channel_missing": "该频道在此服务器上不存在。",
+    "channel_missing_lower": "该频道在此服务器上不存在",
+    "channel_removed": "频道 {name} 已被删除。",
+    "channel_not_listed": "频道 {name} 不在单词计数列表中。",
+    "channel_already_added": "该频道已添加。",
+    "channel_added": "已添加 {name}",
+    "no_wordcount_channels": "此服务器没有字数统计频道。",
+    "list_header": "单词计数频道为:",
+    "ooc_set": "OOC 奖励频道已设置为 {name}",
+    "role_missing": "在此服务器上不存在该角色",
+    "role_already_added": "该角色已被添加。",
+    "role_added": "已添加 {name}",
+    "role_removed": "已删除角色 {name}。",
+    "force_user_missing": "您必须指定您正在强制其总计的用户。",
+    "force_bp_invalid": "必须提交一个加分总数，并且它必须是一个数字",
+    "user_missing": "该用户不在此服务器。",
+    "force_confirm": "{user}现在有{points}奖励积分，字数缓存为{count}。",
+    "status": "{user} 有 {points} 奖励积分，还差 {count} 个词就能获得下一个。",
+    "ooc_award": "{user} 发布了一篇包含 {words} 个字的帖子，获得了 {reward} 奖励积分。该用户的总积分现在为 {total}。"
+  },
+  "admin_tools": {
+    "no_guilds": "没有公会。",
+    "no_channels": "没有频道。",
+    "guild_not_found": "找不到公会。",
+    "channel_not_found": "未找到频道。",
+    "message_not_found": "未找到消息。",
+    "message_sent": "消息已发送。"
+  }
+}
