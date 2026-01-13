@@ -34,8 +34,8 @@
   "nwod": {
     "error_prefix": "Il destino non può decidere sulla tua richiesta perché: ",
     "errors": {
-      "pool_nan": "Pool deve essere un numero",
-      "again_nan": "Il valore dei dadi esplosivi deve essere un numero",
+      "pool_nan": "Pool deve essere un numero intero",
+      "again_nan": "Il valore dei dadi esplosivi deve essere un numero intero",
       "again_low": "I dadi esplosivi non possono essere inferiori a 8.",
       "pool_high": "Non è possibile lanciare più di 25 dadi"
     },

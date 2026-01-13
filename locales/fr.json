@@ -34,8 +34,8 @@
   "nwod": {
     "error_prefix": "Le destin ne peut pas statuer sur votre demande parce que : ",
     "errors": {
-      "pool_nan": "Pool doit être un nombre",
-      "again_nan": "La valeur des dés explosifs doit être un nombre",
+      "pool_nan": "Pool doit être un entier",
+      "again_nan": "La valeur des jets explosifs doit être un entier",
       "again_low": "Les dés explosifs ne peuvent pas être inférieurs à 8.",
       "pool_high": "Impossible de lancer plus de 25 dés"
     },

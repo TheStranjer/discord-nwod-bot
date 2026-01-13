@@ -34,8 +34,8 @@
   "nwod": {
     "error_prefix": "Das Schicksal kann Ihre Anfrage nicht beurteilen, weil: ",
     "errors": {
-      "pool_nan": "Pool muss eine Zahl sein",
-      "again_nan": "Der Wert der explodierenden Würfel muss eine Zahl sein",
+      "pool_nan": "Pool muss eine ganze Zahl sein",
+      "again_nan": "Der Wert für explodierende Würfel muss eine ganze Zahl sein",
       "again_low": "Explodierende Würfel dürfen nicht unter 8 liegen.",
       "pool_high": "Es können nicht mehr als 25 Würfel geworfen werden"
     },

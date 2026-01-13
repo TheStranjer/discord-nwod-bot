@@ -34,8 +34,8 @@
   "nwod": {
     "error_prefix": "O destino não pode decidir sobre o seu pedido porque: ",
     "errors": {
-      "pool_nan": "Pool deve ser um número",
-      "again_nan": "O valor dos dados explosivos deve ser um número",
+      "pool_nan": "Pool deve ser um número inteiro",
+      "again_nan": "O valor dos dados explosivos deve ser um número inteiro",
       "again_low": "Dados explosivos não podem ser inferiores a 8.",
       "pool_high": "Não é possível lançar mais de 25 dados"
     },

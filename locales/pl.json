@@ -59,8 +59,8 @@
   "nwod": {
     "error_prefix": "Przeznaczenie nie może rozstrzygnąć Twojej prośby, ponieważ: ",
     "errors": {
-      "pool_nan": "Pula musi być liczbą",
-      "again_nan": "Wartość eksplodujących kości musi być liczbą.",
+      "pool_nan": "Pool musi być liczbą całkowitą",
+      "again_nan": "Wartość eksplodujących kości musi być liczbą całkowitą",
       "again_low": "Wartość kostek eksplodujących nie może być niższa niż 8.",
       "pool_high": "Nie można rzucić więcej niż 25 kostek."
     },

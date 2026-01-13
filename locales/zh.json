@@ -34,8 +34,8 @@
   "nwod": {
     "error_prefix": "命运无法裁定您的请求，因为：",
     "errors": {
-      "pool_nan": "Pool 必须是数字。",
-      "again_nan": "爆炸骰子的值必须是一个数字",
+      "pool_nan": "Pool 必须是整数",
+      "again_nan": "爆炸骰子的值必须是整数",
       "again_low": "爆裂骰子不能低于8。",
       "pool_high": "不能掷超过25个骰子"
     },
