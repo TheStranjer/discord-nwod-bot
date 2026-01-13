@@ -34,8 +34,8 @@
   "nwod": {
     "error_prefix": "Fate cannot adjuciate your request because: ",
     "errors": {
-      "pool_nan": "Pool must be a number",
-      "again_nan": "Exploding dice value must be a number",
+      "pool_nan": "Pool must be an integer",
+      "again_nan": "Exploding dice value must be an integer",
       "again_low": "Exploding dice may not be below 8",
       "pool_high": "Cannot roll more than 25 dice"
     },
