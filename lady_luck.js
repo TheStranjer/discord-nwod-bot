@@ -1,7 +1,21 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const RandomOrg = require('random-org');
 const { Client, Intents } = require('discord.js');
+
+const storedResultsDir = 'stored_results';
+if (!fs.existsSync(storedResultsDir)) {
+	fs.mkdirSync(storedResultsDir, { recursive: true });
+}
+
+function tokenHashFor(token) {
+	return crypto.createHash('sha256').update(token).digest('hex').slice(0, 7);
+}
+
+function storedResultsPath(hash, die) {
+	return path.join(storedResultsDir, `${hash}_${die}.json`);
+}
 
 const localeConfigPath = 'locales.json';
 const defaultLocaleConfig = {
@@ -171,15 +185,37 @@ console.log(t('console.startup_author'));
 var auth = JSON.parse(fs.readFileSync('auth.json', 'utf8'));
 var wc = JSON.parse(fs.readFileSync('wc.json', 'utf8'));
 var random = new RandomOrg({ apiKey: auth.random, endpoint: 'https://api.random.org/json-rpc/2/invoke' });
-var d10s = [];
 var trueAdmins = auth.trueAdmins || [];
 var clients = [];
 
-if (fs.existsSync('stored_results.json')) {
-	d10s = JSON.parse(fs.readFileSync('stored_results.json', 'utf8'));
+var dicePools = { d10: {}, d12: {} };
+var dicePoolsSnapshot = { d10: {}, d12: {} };
+
+function loadPool(hash, die) {
+	const file = storedResultsPath(hash, die);
+	if (fs.existsSync(file)) {
+		try {
+			const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+			if (Array.isArray(parsed)) {
+				return parsed;
+			}
+		} catch (err) {
+			// ignore, start fresh
+		}
+	}
+	return [];
 }
 
-var d10sold = d10s;
+function ensureTokenPools(hash) {
+	if (!dicePools.d10[hash]) {
+		dicePools.d10[hash] = loadPool(hash, 'd10');
+		dicePoolsSnapshot.d10[hash] = dicePools.d10[hash].slice();
+	}
+	if (!dicePools.d12[hash]) {
+		dicePools.d12[hash] = loadPool(hash, 'd12');
+		dicePoolsSnapshot.d12[hash] = dicePools.d12[hash].slice();
+	}
+}
 
 const isAdmin = member => member.permissions.has("ADMINISTRATOR");
 const randInt = (min,max) => min + Math.round(Math.random() * (max - min));
@@ -192,26 +228,51 @@ function sendLongMessage(channel, content) {
         }
 }
 
-function d10() {
-	const ret = d10s.pop();
-	return typeof ret == 'undefined' ? randInt(1, 10) : ret;
+function d10(tokenHash) {
+	if (tokenHash) {
+		ensureTokenPools(tokenHash);
+		const ret = dicePools.d10[tokenHash].pop();
+		return typeof ret == 'undefined' ? randInt(1, 10) : ret;
+	}
+	return randInt(1, 10);
+}
+
+function d12(tokenHash) {
+	if (tokenHash) {
+		ensureTokenPools(tokenHash);
+		const ret = dicePools.d12[tokenHash].pop();
+		return typeof ret == 'undefined' ? randInt(1, 12) : ret;
+	}
+	return randInt(1, 12);
 }
 
 function unique(value, index, self) {
 	return self.indexOf(value) === index;
 }
 
-function d10RefillCheck() {
-	if (d10s.length < 100) {
-		console.log(t('console.d10_refill_start', { count: d10s.length }));
+function d10RefillCheck(tokenHash) {
+	if (!tokenHash) return;
+	ensureTokenPools(tokenHash);
+	if (dicePools.d10[tokenHash].length < 100) {
+		console.log(t('console.d10_refill_start', { count: dicePools.d10[tokenHash].length }));
 		random.generateIntegers({ min: 1, max: 10, n: 100 }).then(function (result) {
-			d10s = d10s.concat(result.random.data);
-			console.log(t('console.d10_refill_done', { count: d10s.length }));
+			dicePools.d10[tokenHash] = dicePools.d10[tokenHash].concat(result.random.data);
+			console.log(t('console.d10_refill_done', { count: dicePools.d10[tokenHash].length }));
 		});
 	}
 }
 
-function dav20Roll(pool, difficulty, options, localeChain) {
+function d12RefillCheck(tokenHash) {
+	if (!tokenHash) return;
+	ensureTokenPools(tokenHash);
+	if (dicePools.d12[tokenHash].length < 100) {
+		random.generateIntegers({ min: 1, max: 12, n: 100 }).then(function (result) {
+			dicePools.d12[tokenHash] = dicePools.d12[tokenHash].concat(result.random.data);
+		});
+	}
+}
+
+function dav20Roll(pool, difficulty, options, localeChain, tokenHash) {
 	const optionsArray = options ? options.toLowerCase().split('').filter(unique) : [];
 
 	var outcome = {
@@ -233,10 +294,10 @@ function dav20Roll(pool, difficulty, options, localeChain) {
 	}
 
 	for (var i = 0; i < pool; i++) {
-		outcome.results.push(d10());
+		outcome.results.push(d10(tokenHash));
 	}
 
-	d10RefillCheck();
+	d10RefillCheck(tokenHash);
 
 	outcome.botches = outcome.botching ? outcome.results.filter(res => res == 1).length : 0;
 	outcome.hits = outcome.results.filter(res => res >= difficulty).length;
@@ -247,7 +308,7 @@ function dav20Roll(pool, difficulty, options, localeChain) {
 	return outcome;
 }
 
-function nwodRoll(pool, options='', localeChain) {
+function nwodRoll(pool, options='', localeChain, tokenHash) {
 	var again = 10;
 	var rote = false;
 	var botching = false;
@@ -303,7 +364,7 @@ function nwodRoll(pool, options='', localeChain) {
 	if (pool < 1) {
 		var result = null;
 		while (true) {
-			result = d10();
+			result = d10(tokenHash);
 
 			outcome.results.push(result);
 
@@ -314,7 +375,7 @@ function nwodRoll(pool, options='', localeChain) {
 			outcome.successes++;
 		}
 
-		d10RefillCheck();
+		d10RefillCheck(tokenHash);
 
 		return outcome;
 	}
@@ -322,7 +383,7 @@ function nwodRoll(pool, options='', localeChain) {
 	for (i = 0; i < pool; i++) {
 		var free_rerolls = rote ? 1 : 0; // will start out 0 if rote action isn't enabled
 		do {
-			var result = d10();
+			var result = d10(tokenHash);
 			if (result >= 8) {
 				outcome.successes++;
 			} else if (result == 1 && botching) {
@@ -332,7 +393,7 @@ function nwodRoll(pool, options='', localeChain) {
 		} while (result >= outcome.again || free_rerolls-- > 0);
 	}
 
-	d10RefillCheck();
+	d10RefillCheck(tokenHash);
 	
 	return outcome;
 }
@@ -494,7 +555,7 @@ function nwodInitForceToText(msg, val, name, localeChain) {
 	
 }
 
-function nwodInitToText(msg, offset, name, localeChain) {
+function nwodInitToText(msg, offset, name, localeChain, tokenHash) {
 	if (!/^\d+$/.test(offset)) {
 		offset = 0;
 	} else {
@@ -506,7 +567,8 @@ function nwodInitToText(msg, offset, name, localeChain) {
 	}
 
 
-	var roll = d10();
+	var roll = d10(tokenHash);
+	d10RefillCheck(tokenHash);
 	var channelId = msg["channel"].id;
 	var content = t('initiative.roll', { name: name, roll: roll, offset: offset, total: roll + offset }, localeChain);
 	msg.reply(content).then(function (notificationMsg) {
@@ -895,14 +957,14 @@ function wcShow(msg, user_id) {
 	}));
 }
 
-async function handle_message(msg) {
+async function handle_message(msg, tokenHash) {
 	const words = msg.content.split(/\s+/);
 	const command = words[0].toLowerCase();
 	const localeChain = getLocaleChainForMsg(msg);
 
 	switch (command) {
 		case '!nwod':
-			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2], localeChain), localeChain);
+			const nWoDoutcome = nwodToText(nwodRoll(words[1], words[2], localeChain, tokenHash), localeChain);
 			console.log(t('console.roll_nwod', {
 				user: `${msg.author.username}#${msg.author.discriminator}`,
 				outcome: nWoDoutcome
@@ -910,7 +972,7 @@ async function handle_message(msg) {
 			msg.reply(nWoDoutcome);
 			break;
 		case '!dav20':
-			const dav20outcome = dav20ToText(dav20Roll(words[1], words[2], words[3], localeChain), localeChain);
+			const dav20outcome = dav20ToText(dav20Roll(words[1], words[2], words[3], localeChain, tokenHash), localeChain);
 			console.log(t('console.roll_dav20', {
 				user: `${msg.author.username}#${msg.author.discriminator}`,
 				outcome: dav20outcome
@@ -918,7 +980,7 @@ async function handle_message(msg) {
 			msg.reply(dav20outcome);
 			break;
 		case '!init':
-			nwodInitToText(msg, words[1], words[2], localeChain);
+			nwodInitToText(msg, words[1], words[2], localeChain, tokenHash);
 			break;
 		case '!initforce':
 			nwodInitForceToText(msg, words[1], words[2], localeChain);
@@ -1108,27 +1170,42 @@ async function handle_message(msg) {
 
 for (const token of auth.token) {
         const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+        const hash = tokenHashFor(token);
+        ensureTokenPools(hash);
         clients.push(client);
         process.stdout.write(t('console.logging_in'));
-        client.on('message', handle_message);
+        client.on('message', (msg) => handle_message(msg, hash));
         client.on('ready', on_ready);
         client.login(token);
+        d10RefillCheck(hash);
+        d12RefillCheck(hash);
 }
-
-d10RefillCheck();
 
 initTables = {};
 
 var minute = 1000 * 60;
 
-setInterval(function () {
-	if (d10sold == d10s) {
-		return;
+function arraysEqual(a, b) {
+	if (a === b) return true;
+	if (!a || !b || a.length !== b.length) return false;
+	for (var i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) return false;
 	}
+	return true;
+}
 
-	fs.writeFileSync('stored_results.json', JSON.stringify(d10s));
-
-	d10sold = d10s;
-
-	console.log(t('console.stored_results_update'));
+setInterval(function () {
+	var changed = false;
+	for (const die of ['d10', 'd12']) {
+		for (const hash of Object.keys(dicePools[die])) {
+			if (!arraysEqual(dicePoolsSnapshot[die][hash], dicePools[die][hash])) {
+				fs.writeFileSync(storedResultsPath(hash, die), JSON.stringify(dicePools[die][hash]));
+				dicePoolsSnapshot[die][hash] = dicePools[die][hash].slice();
+				changed = true;
+			}
+		}
+	}
+	if (changed) {
+		console.log(t('console.stored_results_update'));
+	}
 }, minute);

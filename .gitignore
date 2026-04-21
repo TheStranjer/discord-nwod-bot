@@ -1,6 +1,7 @@
 /*.json
 node_modules/
 nohup.out
+stored_results/
 
 !package.json
 !package-lock.json
